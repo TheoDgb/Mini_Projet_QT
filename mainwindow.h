@@ -61,8 +61,6 @@
 QT_BEGIN_NAMESPACE
 class QAction;
 class QMenu;
-class QPlainTextEdit;
-class QSessionManager;
 QT_END_NAMESPACE
 
 class MainWindow : public QMainWindow
@@ -74,18 +72,29 @@ public:
     ~MainWindow();
 
 protected:
+//    void closeEvent(QCloseEvent *event) override;
     void mousePressEvent(QMouseEvent *event) override;
     void mouseMoveEvent(QMouseEvent *event) override;
     void paintEvent(QPaintEvent *event) override;
 
 private slots:
+    void newFile();
+    void open();
+    void quit();
+//    void save();
+//    void saveAs();
+//    void about();
 
 private:
-//    void createActions();
+    void createActions();
+    bool maybeSave();
+    bool saveFile(const QByteArray &fileFormat);
+    bool loadFile(const QString &fileName);
 
     QPoint lastPoint;
     QPixmap pixmap;
     QPainter painter;
+    QString currentFile;
 };
 
 #endif

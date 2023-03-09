@@ -306,11 +306,22 @@
 //}
 //#endif
 
+
+
+
+
+
+
+
+
+
 #include <QtWidgets>
 #include "mainwindow.h"
 //#include "ui_mainwindow.h"
+#include <QFileDialog>
 #include <QMenuBar>
 #include <QApplication>
+#include <QMessageBox>
 
 MainWindow::MainWindow(QWidget *parent)
         : QMainWindow(parent) {
@@ -321,15 +332,69 @@ MainWindow::MainWindow(QWidget *parent)
     pixmap = QPixmap(500, 500);
     pixmap.fill(Qt::white);
     painter.begin(&pixmap);
+
+    // Créer un menu avec des actions
+    createActions();
+    // Afficher le menu
+    setMenuBar(menuBar());
 }
 
 MainWindow::~MainWindow()
 {
 }
 
-//void MainWindow::createActions() {
-//
-//}
+void MainWindow::newFile() {
+    if (!pixmap.toImage().isNull()) {
+        // Demander une confirmation à l'utilisateur avant de créer un nouveau fichier
+        QMessageBox::StandardButton reply = QMessageBox::question(
+                this, tr("Confirmation"), tr("Êtes-vous sûr de vouloir créer un nouveau fichier de dessin ?\nTout le contenu non enregistré sera perdu."),
+                QMessageBox::Yes | QMessageBox::No);
+        if (reply != QMessageBox::No) {
+            // Création d'un nouveau fichier de dessin
+            // Remplissage du pixmap avec de la couleur blanche
+            pixmap.fill(Qt::white);
+            // Réinitialisation du painter pour dessiner sur le nouveau pixmap
+            painter.end();
+            painter.begin(&pixmap);
+            // Actualisation de la fenêtre
+            update();
+        }
+    }
+}
+
+void MainWindow::open() {
+
+}
+
+void MainWindow::quit() {
+    QApplication::quit();
+}
+
+void MainWindow::createActions() {
+    // Crée un menu "Fichier" dans la barre de menu
+    QMenu *fileMenu = menuBar()->addMenu(tr("&Fichier"));
+
+    // Création d'une action "Nouveau"
+    QAction *newAction = new QAction(tr("&Nouveau"), this);
+    newAction->setShortcut(QKeySequence::New);
+    connect(newAction, &QAction::triggered, this, &MainWindow::newFile);
+    fileMenu->addAction(newAction);
+
+    // Création d'une action "Ouvrir"
+    QAction *openAction = new QAction(tr("&Ouvrir"), this);
+    openAction->setShortcut(QKeySequence::Open);
+    connect(openAction, &QAction::triggered, this, &MainWindow::open);
+    fileMenu->addAction(openAction);
+
+    // Ajout d'une séparation entre les actions "Ouvrir" et "Quitter"
+    fileMenu->addSeparator();
+
+    // Création d'une action "Quitter"
+    QAction *quitAction = new QAction(tr("&Quitter"), this);
+    quitAction->setShortcut(QKeySequence::Quit);
+    connect(quitAction, &QAction::triggered, this, &MainWindow::quit);
+    fileMenu->addAction(quitAction);
+}
 
 void MainWindow::mousePressEvent(QMouseEvent *event)
 {

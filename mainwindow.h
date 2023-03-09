@@ -57,6 +57,7 @@
 #include <QMainWindow>
 #include <QMouseEvent>
 #include <QPainter>
+#include <QColorDialog>
 
 QT_BEGIN_NAMESPACE
 class QAction;
@@ -80,6 +81,8 @@ private slots:
     void newFile();
     void open();
     void quit();
+    void chooseColor();
+    void chooseBrushSize();
 
 private:
     void createActions();

@@ -319,6 +319,7 @@
 #include <QMenuBar>
 #include <QApplication>
 #include <QMessageBox>
+#include <QColorDialog>
 
 MainWindow::MainWindow(QWidget *parent)
         : QMainWindow(parent) {
@@ -360,11 +361,26 @@ void MainWindow::newFile() {
 }
 
 void MainWindow::open() {
-
+    // ouvrir une image
 }
 
 void MainWindow::quit() {
     QApplication::quit();
+}
+
+void MainWindow::chooseColor() {
+    QColor color = QColorDialog::getColor(painter.pen().color(), this, tr("Choisir une couleur"));
+    if (color.isValid()) {
+        painter.setPen(color);
+    }
+}
+
+void MainWindow::chooseBrushSize() {
+    bool ok;
+    int size = QInputDialog::getInt(this, tr("Taille du pinceau"), tr("Entrez une taille pour le pinceau :"), 1, 1, 50, 1, &ok);
+    if (ok) {
+        painter.setPen(QPen(painter.pen().color(), size, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
+    }
 }
 
 void MainWindow::createActions() {
@@ -391,6 +407,21 @@ void MainWindow::createActions() {
     quitAction->setShortcut(QKeySequence::Quit);
     connect(quitAction, &QAction::triggered, this, &MainWindow::quit);
     fileMenu->addAction(quitAction);
+
+    // Crée un menu "Color" dans la barre de menu
+    QMenu *brushMenu = menuBar()->addMenu(tr("&Brush"));
+
+    // Création d'une action "Choose Color"
+    QAction *colorAction = new QAction(tr("&Choose Color"), this);
+    colorAction->setShortcut(QKeySequence::New);
+    connect(colorAction, &QAction::triggered, this, &MainWindow::chooseColor);
+    brushMenu->addAction(colorAction);
+
+    // Création d'une action "Choose Brush"
+    QAction *sizeAction = new QAction(tr("&Choose Size"), this);
+    sizeAction->setShortcut(QKeySequence::New);
+    connect(sizeAction, &QAction::triggered, this, &MainWindow::chooseBrushSize);
+    brushMenu->addAction(sizeAction);
 }
 
 void MainWindow::mousePressEvent(QMouseEvent *event)

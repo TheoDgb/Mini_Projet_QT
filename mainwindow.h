@@ -72,7 +72,6 @@ public:
     ~MainWindow();
 
 protected:
-//    void closeEvent(QCloseEvent *event) override;
     void mousePressEvent(QMouseEvent *event) override;
     void mouseMoveEvent(QMouseEvent *event) override;
     void paintEvent(QPaintEvent *event) override;
@@ -81,15 +80,9 @@ private slots:
     void newFile();
     void open();
     void quit();
-//    void save();
-//    void saveAs();
-//    void about();
 
 private:
     void createActions();
-    bool maybeSave();
-    bool saveFile(const QByteArray &fileFormat);
-    bool loadFile(const QString &fileName);
 
     QPoint lastPoint;
     QPixmap pixmap;

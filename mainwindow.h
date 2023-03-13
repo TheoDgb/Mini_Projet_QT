@@ -81,11 +81,15 @@ private slots:
     void newFile();
     void open();
     void quit();
-    void chooseColor();
+    bool save();
+    bool saveAs();
+    void chooseBrushColor();
     void chooseBrushSize();
 
 private:
     void createActions();
+    bool saveFile(const QString &fileName);
+    void setCurrentFile(const QString &fileName);
 
     QPoint lastPoint;
     QPixmap pixmap;

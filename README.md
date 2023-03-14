@@ -3,7 +3,7 @@
 Théo Dal Gobbo
 Mini Projet QT en C++
 
-Création d'un
+Création d'une application de dessin en QT
 
 ### Run application :
     qmake

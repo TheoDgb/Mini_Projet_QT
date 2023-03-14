@@ -1,6 +1,5 @@
 #include <QtWidgets>
 #include "mainwindow.h"
-//#include "ui_mainwindow.h"
 #include <QFileDialog>
 #include <QMenuBar>
 #include <QApplication>
@@ -31,9 +30,11 @@ void MainWindow::newFile() {
     if (!pixmap.toImage().isNull()) {
         // Demander une confirmation à l'utilisateur avant de créer un nouveau fichier
         QMessageBox::StandardButton reply = QMessageBox::question(
-                this, tr("Confirmation"), tr("Êtes-vous sûr de vouloir créer un nouveau fichier de dessin ?\nTout le contenu non enregistré sera perdu."),
-                QMessageBox::Yes | QMessageBox::No);
-        if (reply != QMessageBox::No) {
+                this, tr("Unsaved changes"), tr("Are you sure you want to create a new drawing file ?\nAll unsaved content will be lost."),
+                QMessageBox::Yes | QMessageBox::No | QMessageBox::Save);
+        if (reply == QMessageBox::Save) {
+            saveAs();
+        } else if (reply == QMessageBox::Yes) {
             // Création d'un nouveau fichier de dessin
             // Remplissage du pixmap avec de la couleur blanche
             pixmap.fill(Qt::white);
@@ -109,31 +110,37 @@ bool MainWindow::saveFile(const QString &fileName)
     statusBar()->showMessage(tr("Image saved"), 2000);
     return true;
 }
-
+//
 void MainWindow::chooseBrushColor() {
-    QColor color = QColorDialog::getColor(painter.pen().color(), this, tr("Choisir une couleur"));
+    QColor color = QColorDialog::getColor(painter.pen().color(), this, tr("Choose a color"));
     if (color.isValid()) {
-        painter.setPen(color);
+        painter.setPen(QPen(color, painter.pen().width(), painter.pen().style()));
     }
 }
 
 void MainWindow::chooseBrushSize() {
     bool ok;
-    int size = QInputDialog::getInt(this, tr("Taille du pinceau"), tr("Entrez une taille pour le pinceau :"), 1, 1, 50, 1, &ok);
+    int size = QInputDialog::getInt(this, tr("Brush size"), tr("Select a brush size :"), 1, 1, 50, 1, &ok);
     if (ok) {
         painter.setPen(QPen(painter.pen().color(), size, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
     }
 }
 
+void MainWindow::chooseForm()
+{
+    // choisir une forme
+}
+
 void MainWindow::createActions() {
     // Crée un menu "Fichier" dans la barre de menu
-    QMenu *fileMenu = menuBar()->addMenu(tr("&Fichier"));
+    QMenu *fileMenu = menuBar()->addMenu(tr("&File"));
     // Crée une toolbar
-    QToolBar *fileToolBar = addToolBar(tr("Fichier"));
+    QToolBar *fileToolBar = addToolBar(tr("File"));
+    fileToolBar->setStyleSheet("background-color: #00D6FF;");
 
     const QIcon newIcon = QIcon::fromTheme("document-new", QIcon(":/images/new.png"));
     // Création d'une action "Nouveau"
-    QAction *newAction = new QAction(tr("&Nouveau"), this);
+    QAction *newAction = new QAction(newIcon, tr("&New"), this);
     newAction->setShortcut(QKeySequence::New);
     newAction->setStatusTip(tr("Create a new file"));
     connect(newAction, &QAction::triggered, this, &MainWindow::newFile);
@@ -143,7 +150,7 @@ void MainWindow::createActions() {
 
     // Action ouvrir une image
     const QIcon openIcon = QIcon::fromTheme("document-open", QIcon(":/images/open.png"));
-    QAction *openAction = new QAction(openIcon, tr("&Ouvrir"), this);
+    QAction *openAction = new QAction(openIcon, tr("&Open"), this);
     openAction->setShortcuts(QKeySequence::Open);
     openAction->setStatusTip(tr("Open an existing file"));
     connect(openAction, &QAction::triggered, this, &MainWindow::open);
@@ -172,19 +179,21 @@ void MainWindow::createActions() {
     fileMenu->addSeparator();
 
     // Création d'une action "Quitter"
-    QAction *quitAction = new QAction(tr("&Quitter"), this);
-    quitAction->setShortcut(QKeySequence::Quit);
-    connect(quitAction, &QAction::triggered, this, &MainWindow::quit);
-    fileMenu->addAction(quitAction);
+    QAction *exitAction = new QAction(tr("&Exit"), this);
+    exitAction->setShortcut(QKeySequence::Quit);
+    exitAction->setStatusTip(tr("Exit the application"));
+    connect(exitAction, &QAction::triggered, this, &MainWindow::quit);
+    fileMenu->addAction(exitAction);
 
     // Créer un menu "Brush" dans la barre de menu
     QMenu *brushMenu = menuBar()->addMenu(tr("&Brush"));
     // Créer une toolbar "Brush"
     QToolBar *brushToolBar = addToolBar(tr("Brush"));
+    brushToolBar->setStyleSheet("background-color: #9A9A9A;");
 
     // Action choisir la couleur de la brush
-    const QIcon cutIcon = QIcon::fromTheme("edit-cut", QIcon(":/images/cut.png"));
-    QAction *colorAction = new QAction(cutIcon, tr("Choose Color"), this);
+    const QIcon colorIcon = QIcon::fromTheme("color-picker", QIcon(":/images/color.png"));
+    QAction *colorAction = new QAction(colorIcon, tr("Choose Color"), this);
     colorAction->setShortcut(QKeySequence::New);
     colorAction->setStatusTip(tr("Choose a color for the brush"));
     connect(colorAction, &QAction::triggered, this, &MainWindow::chooseBrushColor);
@@ -201,6 +210,13 @@ void MainWindow::createActions() {
     brushToolBar->addAction(sizeAction);
 
     // Action choisir une forme (cercle/trait/rectangle)
+    const QIcon formIcon = QIcon("./images/form.png");
+    QAction *formAction = new QAction(formIcon,tr("&Choose Form"), this);
+    formAction->setShortcut(QKeySequence::New);
+    formAction->setStatusTip(tr("Choose a form"));
+    connect(formAction, &QAction::triggered, this, &MainWindow::chooseForm);
+    brushMenu->addAction(formAction);
+    brushToolBar->addAction(formAction);
 
     // Action
 

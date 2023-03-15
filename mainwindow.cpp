@@ -202,21 +202,38 @@ void MainWindow::resizeImage() {
     // Update the display
     update();
 }
-void MainWindow::resizeCanvas() {
-    bool ok;
-    int newWidth = QInputDialog::getInt(this, tr("Nouvelle largeur"), tr("Largeur :"), pixmap.width(), 1, 2000, 1, &ok);
-    if (!ok) return;
-    int newHeight = QInputDialog::getInt(this, tr("Nouvelle hauteur"), tr("Hauteur :"), pixmap.height(), 1, 2000, 1, &ok);
-    if (!ok) return;
 
+void MainWindow::resizeCanvas() {
+    // Ouvrir une boite de dialogue pour demander une nouvelle taille pour la zone de dessin
+    bool ok;
+    int newWidth = QInputDialog::getInt(this, tr("Nouvelle largeur"), tr("Entrer la nouvelle largeur :"), pixmap.width(), 100, 1000, 1, &ok);
+    if (!ok) return; // L'utilisateur a cliqué sur Annuler ou Fermer
+
+    int newHeight = QInputDialog::getInt(this, tr("Nouvelle hauteur"), tr("Entrer la nouvelle hauteur :"), pixmap.height(), 100, 1000, 1, &ok);
+    if (!ok) return; // L'utilisateur a cliqué sur Annuler ou Fermer
+
+    // Sauvegarder la taille et la couleur de la brosse
+    int oldBrushSize = painter.pen().width();
+    QColor oldBrushColor = painter.pen().color();
+
+    // Arrêter de dessiner
     painter.end();
+
+    // Copier le dessin actuel
+    QPixmap oldPixmap = pixmap;
 
     // Mettre à jour la taille de la zone de dessin
     pixmap = QPixmap(newWidth, newHeight);
     pixmap.fill(Qt::white);
 
+    // Ajouter du blanc pour agrandir la zone de dessin
     painter.begin(&pixmap);
+    painter.drawPixmap(0, 0, oldPixmap);
 
+    // Restaurer la taille et la couleur de la brosse
+    painter.setPen(QPen(oldBrushColor, oldBrushSize, Qt::SolidLine));
+
+    // Mettre à jour l'affichage de la zone de dessin
     update();
 }
 
@@ -311,7 +328,7 @@ void MainWindow::createActions() {
     QMenu *imageMenu = menuBar()->addMenu(tr("&Image"));
 
     // Action redimensionner l'image
-    const QIcon resizeIcon = QIcon::fromTheme("resize", QIcon(":/images/resize.png"));
+    const QIcon resizeIcon = QIcon("./images/resize.png");
     QAction *resizeImageAction = new QAction(resizeIcon, tr("Resize image"), this);
     resizeImageAction->setShortcut(QKeySequence::New);
     resizeImageAction->setStatusTip(tr("Resize the image"));
@@ -319,7 +336,7 @@ void MainWindow::createActions() {
     imageMenu->addAction(resizeImageAction);
 
     // Action modifier la taille de la zone de dessin
-    const QIcon resizeCanvasIcon = QIcon::fromTheme("resizeCanvas", QIcon(":/images/resizeCanvas.png"));
+    const QIcon resizeCanvasIcon = QIcon("./images/resizeCanvas.png");
     QAction *resizeCanvasAction = new QAction(resizeCanvasIcon, tr("Resize canvas"), this);
     resizeCanvasAction->setShortcut(QKeySequence::New);
     resizeCanvasAction->setStatusTip(tr("Resize the canvas"));
@@ -332,7 +349,7 @@ void MainWindow::createActions() {
 
     // Menu image :
     // redimensionner CHECK
-    // taille de zone du dessin
+    // taille de zone du dessin CHECK
     // retourner horizontalement
     // retourner verticalement
     // faire pivoter

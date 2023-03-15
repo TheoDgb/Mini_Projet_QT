@@ -19,6 +19,8 @@ public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
+//    explicit MainWindow(QWidget *parent = nullptr);
+
 protected:
     void mousePressEvent(QMouseEvent *event) override;
     void mouseMoveEvent(QMouseEvent *event) override;
@@ -44,7 +46,6 @@ private:
     QPixmap pixmap;
     QPainter painter;
     QString currentFile;
-    QWidget* drawWidget;
 };
 
 #endif

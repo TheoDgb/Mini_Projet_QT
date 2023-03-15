@@ -9,10 +9,10 @@
 MainWindow::MainWindow(QWidget *parent)
         : QMainWindow(parent) {
     // taille de la fenetre <=
-    resize(500, 500);
+    resize(720, 720);
 
     // Initialise le pixmap et le painter
-    pixmap = QPixmap(500, 500);
+    pixmap = QPixmap(400, 400);
     pixmap.fill(Qt::white);
     painter.begin(&pixmap);
 
@@ -21,6 +21,12 @@ MainWindow::MainWindow(QWidget *parent)
     // Afficher le menu
     setMenuBar(menuBar());
 }
+
+
+
+//centralwidget
+
+
 
 
 
@@ -148,28 +154,88 @@ void MainWindow::chooseForm()
 }
 
 // Menu Image
-void MainWindow::resizeImage()
-{
-    bool ok;
-    int newWidth = QInputDialog::getInt(this, tr("Resize Image"), tr("New width:"), pixmap.width(), 1, 10000, 1, &ok);
-    if (!ok)
-        return;
-    int newHeight = QInputDialog::getInt(this, tr("Resize Image"), tr("New height:"), pixmap.height(), 1, 10000, 1, &ok);
-    if (!ok)
+//void MainWindow::resizeImage()
+//{
+//    bool ok;
+//    int newWidth = QInputDialog::getInt(this, tr("Resize Image"), tr("New width:"), pixmap.width(), 1, 10000, 1, &ok);
+//    if (!ok)
+//        return;
+//    int newHeight = QInputDialog::getInt(this, tr("Resize Image"), tr("New height:"), pixmap.height(), 1, 10000, 1, &ok);
+//    if (!ok)
+//        return;
+//
+//    painter.end(); // End the painting on the old pixmap
+//    // Redimensionne le pixmap
+//    QPixmap newPixmap(newWidth, newHeight);
+//    newPixmap.fill(Qt::white);
+//    QPainter newPainter(&newPixmap);
+//    newPainter.drawPixmap(QPoint(0, 0), pixmap);
+//    pixmap = newPixmap;
+//    painter.begin(&pixmap); // Begin painting on the new pixmap
+//
+//    // Met à jour l'affichage
+//    update();
+//}
+
+void MainWindow::resizeImage() {
+    QDialog dialog(this);
+    dialog.setWindowTitle(tr("Resize Image"));
+    // Demande nouvelle largeur
+    QSpinBox *widthSpinBox = new QSpinBox(&dialog);
+    widthSpinBox->setRange(1, 10000);
+    widthSpinBox->setValue(pixmap.width());
+    QLabel *widthLabel = new QLabel(tr("New width:"), &dialog);
+    widthLabel->setBuddy(widthSpinBox);
+    // Demande nouvelle hauteur
+    QSpinBox *heightSpinBox = new QSpinBox(&dialog);
+    heightSpinBox->setRange(1, 10000);
+    heightSpinBox->setValue(pixmap.height());
+    QLabel *heightLabel = new QLabel(tr("New height:"), &dialog);
+    heightLabel->setBuddy(heightSpinBox);
+    // Checkbox ré-échantillonnage proche voisin
+    QCheckBox *nearestNeighborCheckBox = new QCheckBox(tr("Use nearest-neighbor resampling"), &dialog);
+    QDialogButtonBox buttonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel, Qt::Horizontal, &dialog);
+    // Créer la VBox et on lui associe les widgets précédents
+    QVBoxLayout layout(&dialog);
+    layout.addWidget(widthLabel);
+    layout.addWidget(widthSpinBox);
+    layout.addWidget(heightLabel);
+    layout.addWidget(heightSpinBox);
+    layout.addWidget(nearestNeighborCheckBox);
+    layout.addWidget(&buttonBox);
+
+    connect(&buttonBox, &QDialogButtonBox::accepted, &dialog, &QDialog::accept);
+    connect(&buttonBox, &QDialogButtonBox::rejected, &dialog, &QDialog::reject);
+
+    if (dialog.exec() != QDialog::Accepted)
         return;
 
+    int newWidth = widthSpinBox->value();
+    int newHeight = heightSpinBox->value();
+    bool useNearestNeighbor = nearestNeighborCheckBox->isChecked();
+
     painter.end(); // End the painting on the old pixmap
-    // Redimensionne le pixmap
+
+    // Resize the pixmap
     QPixmap newPixmap(newWidth, newHeight);
     newPixmap.fill(Qt::white);
     QPainter newPainter(&newPixmap);
-    newPainter.drawPixmap(QPoint(0, 0), pixmap);
+
+    if (useNearestNeighbor) { // ré-échantillonnage proche voisin
+        newPainter.setRenderHint(QPainter::SmoothPixmapTransform, false);
+        newPainter.drawPixmap(0, 0, newWidth, newHeight, pixmap.scaled(newWidth, newHeight, Qt::IgnoreAspectRatio, Qt::FastTransformation));
+    } else { // ré-échantillonnage meilleure qualité
+        newPainter.setRenderHint(QPainter::SmoothPixmapTransform, true);
+        newPainter.drawPixmap(QPoint(0, 0), pixmap.scaled(newWidth, newHeight, Qt::IgnoreAspectRatio, Qt::SmoothTransformation));
+    }
+
     pixmap = newPixmap;
     painter.begin(&pixmap); // Begin painting on the new pixmap
 
-    // Met à jour l'affichage
+    // Update the display
     update();
 }
+
 
 void MainWindow::createActions() {
     // Crée un menu "Fichier" dans la barre de menu

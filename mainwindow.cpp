@@ -343,8 +343,6 @@ void MainWindow::createActions() {
     connect(resizeCanvasAction, &QAction::triggered, this, &MainWindow::resizeCanvas);
     imageMenu->addAction(resizeCanvasAction);
 
-
-
     // Action
 
     // Menu image :

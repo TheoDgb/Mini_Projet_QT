@@ -202,7 +202,23 @@ void MainWindow::resizeImage() {
     // Update the display
     update();
 }
+void MainWindow::resizeCanvas() {
+    bool ok;
+    int newWidth = QInputDialog::getInt(this, tr("Nouvelle largeur"), tr("Largeur :"), pixmap.width(), 1, 2000, 1, &ok);
+    if (!ok) return;
+    int newHeight = QInputDialog::getInt(this, tr("Nouvelle hauteur"), tr("Hauteur :"), pixmap.height(), 1, 2000, 1, &ok);
+    if (!ok) return;
 
+    painter.end();
+
+    // Mettre à jour la taille de la zone de dessin
+    pixmap = QPixmap(newWidth, newHeight);
+    pixmap.fill(Qt::white);
+
+    painter.begin(&pixmap);
+
+    update();
+}
 
 void MainWindow::createActions() {
     // Crée un menu "Fichier" dans la barre de menu
@@ -302,12 +318,20 @@ void MainWindow::createActions() {
     connect(resizeImageAction, &QAction::triggered, this, &MainWindow::resizeImage);
     imageMenu->addAction(resizeImageAction);
 
+    // Action modifier la taille de la zone de dessin
+    const QIcon resizeCanvasIcon = QIcon::fromTheme("resizeCanvas", QIcon(":/images/resizeCanvas.png"));
+    QAction *resizeCanvasAction = new QAction(resizeCanvasIcon, tr("Resize canvas"), this);
+    resizeCanvasAction->setShortcut(QKeySequence::New);
+    resizeCanvasAction->setStatusTip(tr("Resize the canvas"));
+    connect(resizeCanvasAction, &QAction::triggered, this, &MainWindow::resizeCanvas);
+    imageMenu->addAction(resizeCanvasAction);
+
 
 
     // Action
 
     // Menu image :
-    // redimensionner
+    // redimensionner CHECK
     // taille de zone du dessin
     // retourner horizontalement
     // retourner verticalement

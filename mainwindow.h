@@ -36,6 +36,7 @@ private slots:
     void chooseBrushSize();
     void chooseForm();
     void resizeImage();
+    void resizeCanvas();
 
 private:
     void createActions();

@@ -33,6 +33,7 @@ private slots:
     void chooseBrushColor();
     void chooseBrushSize();
     void chooseForm();
+    void resizeImage();
 
 private:
     void createActions();
@@ -43,6 +44,7 @@ private:
     QPixmap pixmap;
     QPainter painter;
     QString currentFile;
+    QWidget* drawWidget;
 };
 
 #endif

@@ -22,16 +22,6 @@ MainWindow::MainWindow(QWidget *parent)
     setMenuBar(menuBar());
 }
 
-
-
-//centralwidget
-
-
-
-
-
-
-
 MainWindow::~MainWindow()
 {
 }
@@ -154,29 +144,6 @@ void MainWindow::chooseForm()
 }
 
 // Menu Image
-//void MainWindow::resizeImage()
-//{
-//    bool ok;
-//    int newWidth = QInputDialog::getInt(this, tr("Resize Image"), tr("New width:"), pixmap.width(), 1, 10000, 1, &ok);
-//    if (!ok)
-//        return;
-//    int newHeight = QInputDialog::getInt(this, tr("Resize Image"), tr("New height:"), pixmap.height(), 1, 10000, 1, &ok);
-//    if (!ok)
-//        return;
-//
-//    painter.end(); // End the painting on the old pixmap
-//    // Redimensionne le pixmap
-//    QPixmap newPixmap(newWidth, newHeight);
-//    newPixmap.fill(Qt::white);
-//    QPainter newPainter(&newPixmap);
-//    newPainter.drawPixmap(QPoint(0, 0), pixmap);
-//    pixmap = newPixmap;
-//    painter.begin(&pixmap); // Begin painting on the new pixmap
-//
-//    // Met à jour l'affichage
-//    update();
-//}
-
 void MainWindow::resizeImage() {
     QDialog dialog(this);
     dialog.setWindowTitle(tr("Resize Image"));

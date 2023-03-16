@@ -38,6 +38,7 @@ private slots:
     void resizeImage();
     void resizeCanvas();
     void flipHorizontally();
+    void flipVertically();
 
 private:
     void createActions();

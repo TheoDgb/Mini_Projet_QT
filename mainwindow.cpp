@@ -251,6 +251,21 @@ void MainWindow::flipHorizontally() {
 
     update();
 }
+void MainWindow::flipVertically() {
+    int oldBrushSize = painter.pen().width();
+    QColor oldBrushColor = painter.pen().color();
+
+    painter.end();
+
+    // Flip verticalement la pixmap
+    QPixmap flippedPixmap = pixmap.transformed(QTransform().scale(1, -1));
+    pixmap = flippedPixmap;
+
+    painter.begin(&pixmap);
+    painter.setPen(QPen(oldBrushColor, oldBrushSize, Qt::SolidLine));
+
+    update();
+}
 
 void MainWindow::createActions() {
     // Crée un menu "Fichier" dans la barre de menu
@@ -365,6 +380,14 @@ void MainWindow::createActions() {
     flipHorizontallyAction->setStatusTip(tr("Flip horizontally the image"));
     connect(flipHorizontallyAction, &QAction::triggered, this, &MainWindow::flipHorizontally);
     imageMenu->addAction(flipHorizontallyAction);
+
+    // Action retourner verticalement le dessin
+    const QIcon flipVerticallyIcon = QIcon("./images/flipVertically.png");
+    QAction *flipVerticallyAction = new QAction(flipVerticallyIcon, tr("Flip vertically"), this);
+    flipVerticallyAction->setShortcut(QKeySequence::New);
+    flipVerticallyAction->setStatusTip(tr("Flip Vertically the image"));
+    connect(flipVerticallyAction, &QAction::triggered, this, &MainWindow::flipVertically);
+    imageMenu->addAction(flipVerticallyAction);
 
 //    A FAIRE : COMME POUR RESIZE CANVAS ENREGISTRER PINCEAU ET COULEUR POUR OPEN d'images
 //    A FAIRE : brush size : se rappeller de la taille quand on veut la changer car là ca remet a 1 la selection

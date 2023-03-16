@@ -35,6 +35,8 @@ private slots:
     void chooseBrushColor();
     void chooseBrushSize();
     void chooseForm();
+    void pixelGrid(bool);
+
     void resizeImage();
     void resizeCanvas();
     void flipHorizontally();
@@ -52,6 +54,7 @@ private:
     QPixmap pixmap;
     QPainter painter;
     QString currentFile;
+    QAction *pixelGridAction;
 };
 
 #endif

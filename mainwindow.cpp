@@ -143,6 +143,50 @@ void MainWindow::chooseForm()
     // choisir une forme
 }
 
+// Menu Affichage
+//void MainWindow::pixelGrid() {
+//    // Modifier l'état de l'action
+//    pixelGridAction->setChecked(!pixelGridAction->isChecked());
+//
+//    // Dessiner une grille pour les pixels
+//    painter.begin(&pixmap);
+//    painter.setPen(Qt::gray);
+//    for (int x = 0; x < pixmap.width(); x += 10) {
+//        painter.drawLine(x, 0, x, pixmap.height());
+//    }
+//    for (int y = 0; y < pixmap.height(); y += 10) {
+//        painter.drawLine(0, y, pixmap.width(), y);
+//    }
+//    painter.end();
+//
+//    // Mettre à jour l'affichage du pixmap
+//    update();
+//}
+void MainWindow::pixelGrid(bool checked) {
+    // Modifier l'état de l'action si nécessaire
+    if (pixelGridAction->isChecked() != checked) {
+        pixelGridAction->setChecked(checked);
+    }
+
+    // Dessiner la grille ou effacer la grille en fonction de l'état de l'action
+    painter.begin(&pixmap);
+    if (checked) {
+        painter.setPen(Qt::gray);
+        for (int x = 0; x < pixmap.width(); x += 10) {
+            painter.drawLine(x, 0, x, pixmap.height());
+        }
+        for (int y = 0; y < pixmap.height(); y += 10) {
+            painter.drawLine(0, y, pixmap.width(), y);
+        }
+    } else {
+        painter.fillRect(0, 0, pixmap.width(), pixmap.height(), Qt::white);
+    }
+    painter.end();
+
+    // Mettre à jour l'affichage du pixmap
+    update();
+}
+
 // Menu Image
 void MainWindow::resizeImage() {
     QDialog dialog(this);
@@ -399,6 +443,24 @@ void MainWindow::createActions() {
     brushMenu->addAction(formAction);
     brushToolBar->addAction(formAction);
 
+    // Créer un menu "Affichage" dans la barre de menu
+    QMenu *displayMenu = menuBar()->addMenu(tr("&Display"));
+
+    // Créer une toolbar "Display"
+    QToolBar *displayToolBar = addToolBar(tr("Display"));
+    displayToolBar->setStyleSheet("background-color: yellow;");
+
+    // Action afficher une grille des pixels
+    const QIcon pixelGridIcon = QIcon("./images/pixelGrid.png");
+    pixelGridAction = new QAction(pixelGridIcon, tr("Pixel grid"), this);
+    pixelGridAction->setShortcut(QKeySequence::New);
+    pixelGridAction->setStatusTip(tr("Pixel grid"));
+    pixelGridAction->setCheckable(true);
+//    connect(pixelGridAction, &QAction::triggered, this, &MainWindow::pixelGrid);
+    connect(pixelGridAction, &QAction::toggled, this, &MainWindow::pixelGrid);
+    displayMenu->addAction(pixelGridAction);
+    displayToolBar->addAction(pixelGridAction);
+
     // Créer un menu "Image" dans la barre de menu
     QMenu *imageMenu = menuBar()->addMenu(tr("&Image"));
 
@@ -461,12 +523,8 @@ void MainWindow::createActions() {
 //    A FAIRE : COMME POUR RESIZE CANVAS ENREGISTRER PINCEAU ET COULEUR POUR OPEN d'images
 //    A FAIRE : brush size : se rappeller de la taille quand on veut la changer car là ca remet a 1 la selection
 //    A FAIRE : quand on change de couleur, le painceau devient des cubes
-    // Menu image :
-    // redimensionner CHECK
-    // taille de zone du dessin CHECK
-    // retourner horizontalement CHECK
-    // retourner verticalement CHECK
-    // faire pivoter CHECK
+//    A FAIRE : resizecanva : 1 boite de dialog
+//    A FAIRE : setStatusTip marche pas
 
     // Menu affichage :
     // zoom avant / arrière : mettre raccourci ctrl +molette
@@ -490,6 +548,15 @@ void MainWindow::createActions() {
     // Menu calque
 
     // Menu effet
+
+
+
+    // Menu image :
+    // redimensionner CHECK
+    // taille de zone du dessin CHECK
+    // retourner horizontalement CHECK
+    // retourner verticalement CHECK
+    // faire pivoter CHECK
 }
 
 void MainWindow::mousePressEvent(QMouseEvent *event)

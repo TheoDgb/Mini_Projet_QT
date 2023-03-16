@@ -266,6 +266,51 @@ void MainWindow::flipVertically() {
 
     update();
 }
+void MainWindow::rotateRight() {
+    int oldBrushSize = painter.pen().width();
+    QColor oldBrushColor = painter.pen().color();
+
+    painter.end();
+
+    // Pivote de 90° vers la droite la pixmap
+    QPixmap rotatedPixmap = pixmap.transformed(QTransform().rotate(90));
+    pixmap = rotatedPixmap;
+
+    painter.begin(&pixmap);
+    painter.setPen(QPen(oldBrushColor, oldBrushSize, Qt::SolidLine));
+
+    update();
+}
+void MainWindow::rotateLeft() {
+    int oldBrushSize = painter.pen().width();
+    QColor oldBrushColor = painter.pen().color();
+
+    painter.end();
+
+    // Pivote de 90° vers la gauche la pixmap
+    QPixmap rotatedPixmap = pixmap.transformed(QTransform().rotate(-90));
+    pixmap = rotatedPixmap;
+
+    painter.begin(&pixmap);
+    painter.setPen(QPen(oldBrushColor, oldBrushSize, Qt::SolidLine));
+
+    update();
+}
+void MainWindow::rotateBehind() {
+    int oldBrushSize = painter.pen().width();
+    QColor oldBrushColor = painter.pen().color();
+
+    painter.end();
+
+    // Pivote de 180°
+    QPixmap rotatedPixmap = pixmap.transformed(QTransform().rotate(180));
+    pixmap = rotatedPixmap;
+
+    painter.begin(&pixmap);
+    painter.setPen(QPen(oldBrushColor, oldBrushSize, Qt::SolidLine));
+
+    update();
+}
 
 void MainWindow::createActions() {
     // Crée un menu "Fichier" dans la barre de menu
@@ -389,6 +434,30 @@ void MainWindow::createActions() {
     connect(flipVerticallyAction, &QAction::triggered, this, &MainWindow::flipVertically);
     imageMenu->addAction(flipVerticallyAction);
 
+    // Action pivoter de 90° le dessin vers la droite
+    const QIcon rotateRightIcon = QIcon("./images/rotateRight.png");
+    QAction *rotateRightAction = new QAction(rotateRightIcon, tr("Rotate 90° to the right"), this);
+    rotateRightAction->setShortcut(QKeySequence::New);
+    rotateRightAction->setStatusTip(tr("Rotate the image 90° to the right"));
+    connect(rotateRightAction, &QAction::triggered, this, &MainWindow::rotateRight);
+    imageMenu->addAction(rotateRightAction);
+
+    // Action pivoter de 90° le dessin vers la gauche
+    const QIcon rotateLeftIcon = QIcon("./images/rotateLeft.png");
+    QAction *rotateLeftAction = new QAction(rotateRightIcon, tr("Rotate 90° to the left"), this);
+    rotateLeftAction->setShortcut(QKeySequence::New);
+    rotateLeftAction->setStatusTip(tr("Rotate the image 90° to the left"));
+    connect(rotateLeftAction, &QAction::triggered, this, &MainWindow::rotateLeft);
+    imageMenu->addAction(rotateLeftAction);
+
+    // Action pivoter de 180° le dessin
+    const QIcon rotateBehindIcon = QIcon("./images/rotateBehind.png");
+    QAction *rotateBehindAction = new QAction(rotateRightIcon, tr("Rotate 180°"), this);
+    rotateBehindAction->setShortcut(QKeySequence::New);
+    rotateBehindAction->setStatusTip(tr("Rotate the image 180°"));
+    connect(rotateBehindAction, &QAction::triggered, this, &MainWindow::rotateBehind);
+    imageMenu->addAction(rotateBehindAction);
+
 //    A FAIRE : COMME POUR RESIZE CANVAS ENREGISTRER PINCEAU ET COULEUR POUR OPEN d'images
 //    A FAIRE : brush size : se rappeller de la taille quand on veut la changer car là ca remet a 1 la selection
 //    A FAIRE : quand on change de couleur, le painceau devient des cubes
@@ -397,7 +466,7 @@ void MainWindow::createActions() {
     // taille de zone du dessin CHECK
     // retourner horizontalement CHECK
     // retourner verticalement CHECK
-    // faire pivoter
+    // faire pivoter CHECK
 
     // Menu affichage :
     // zoom avant / arrière : mettre raccourci ctrl +molette

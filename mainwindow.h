@@ -39,6 +39,9 @@ private slots:
     void resizeCanvas();
     void flipHorizontally();
     void flipVertically();
+    void rotateRight();
+    void rotateLeft();
+    void rotateBehind();
 
 private:
     void createActions();

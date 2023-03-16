@@ -395,8 +395,8 @@ void MainWindow::createActions() {
     // Menu image :
     // redimensionner CHECK
     // taille de zone du dessin CHECK
-    // retourner horizontalement
-    // retourner verticalement
+    // retourner horizontalement CHECK
+    // retourner verticalement CHECK
     // faire pivoter
 
     // Menu affichage :

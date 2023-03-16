@@ -444,7 +444,7 @@ void MainWindow::createActions() {
 
     // Action pivoter de 90° le dessin vers la gauche
     const QIcon rotateLeftIcon = QIcon("./images/rotateLeft.png");
-    QAction *rotateLeftAction = new QAction(rotateRightIcon, tr("Rotate 90° to the left"), this);
+    QAction *rotateLeftAction = new QAction(rotateLeftIcon, tr("Rotate 90° to the left"), this);
     rotateLeftAction->setShortcut(QKeySequence::New);
     rotateLeftAction->setStatusTip(tr("Rotate the image 90° to the left"));
     connect(rotateLeftAction, &QAction::triggered, this, &MainWindow::rotateLeft);
@@ -452,7 +452,7 @@ void MainWindow::createActions() {
 
     // Action pivoter de 180° le dessin
     const QIcon rotateBehindIcon = QIcon("./images/rotateBehind.png");
-    QAction *rotateBehindAction = new QAction(rotateRightIcon, tr("Rotate 180°"), this);
+    QAction *rotateBehindAction = new QAction(rotateBehindIcon, tr("Rotate 180°"), this);
     rotateBehindAction->setShortcut(QKeySequence::New);
     rotateBehindAction->setStatusTip(tr("Rotate the image 180°"));
     connect(rotateBehindAction, &QAction::triggered, this, &MainWindow::rotateBehind);

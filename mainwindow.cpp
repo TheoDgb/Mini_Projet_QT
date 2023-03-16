@@ -236,6 +236,21 @@ void MainWindow::resizeCanvas() {
     // Mettre à jour l'affichage de la zone de dessin
     update();
 }
+void MainWindow::flipHorizontally() {
+    int oldBrushSize = painter.pen().width();
+    QColor oldBrushColor = painter.pen().color();
+
+    painter.end();
+
+    // Flip horizontalement la pixmap
+    QPixmap flippedPixmap = pixmap.transformed(QTransform().scale(-1, 1));
+    pixmap = flippedPixmap;
+
+    painter.begin(&pixmap);
+    painter.setPen(QPen(oldBrushColor, oldBrushSize, Qt::SolidLine));
+
+    update();
+}
 
 void MainWindow::createActions() {
     // Crée un menu "Fichier" dans la barre de menu
@@ -343,8 +358,17 @@ void MainWindow::createActions() {
     connect(resizeCanvasAction, &QAction::triggered, this, &MainWindow::resizeCanvas);
     imageMenu->addAction(resizeCanvasAction);
 
-    // Action
+    // Action retourner horizontalement le dessin
+    const QIcon flipHorizontallyIcon = QIcon("./images/flipHorizontally.png");
+    QAction *flipHorizontallyAction = new QAction(flipHorizontallyIcon, tr("Flip horizontally"), this);
+    flipHorizontallyAction->setShortcut(QKeySequence::New);
+    flipHorizontallyAction->setStatusTip(tr("Flip horizontally the image"));
+    connect(flipHorizontallyAction, &QAction::triggered, this, &MainWindow::flipHorizontally);
+    imageMenu->addAction(flipHorizontallyAction);
 
+//    A FAIRE : COMME POUR RESIZE CANVAS ENREGISTRER PINCEAU ET COULEUR POUR OPEN d'images
+//    A FAIRE : brush size : se rappeller de la taille quand on veut la changer car là ca remet a 1 la selection
+//    A FAIRE : quand on change de couleur, le painceau devient des cubes
     // Menu image :
     // redimensionner CHECK
     // taille de zone du dessin CHECK
@@ -356,6 +380,20 @@ void MainWindow::createActions() {
     // zoom avant / arrière : mettre raccourci ctrl +molette
     // une règle des pixels sur les cotés gauche et haut
     // grille de pixels
+
+    // Menu Outils :
+    // rectangle de selection
+    // déplacer les pixels sélectionnés
+    // selctionner au lasso
+    // déplacer la sélection
+    // Zoom
+    // baguette magique
+    // pot de peinture
+    // pinceau
+    // selecteur de couleur
+    // texte
+    // formes
+    // droite / courbe
 
     // Menu calque
 

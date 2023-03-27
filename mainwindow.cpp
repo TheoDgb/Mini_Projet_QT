@@ -22,10 +22,6 @@ MainWindow::MainWindow(QWidget *parent)
     setMenuBar(menuBar());
 }
 
-MainWindow::~MainWindow()
-{
-}
-
 void MainWindow::newFile() {
     if (!pixmap.toImage().isNull()) {
         // Demander une confirmation à l'utilisateur avant de créer un nouveau fichier
@@ -122,7 +118,93 @@ bool MainWindow::saveFile(const QString &fileName)
     statusBar()->showMessage(tr("Image saved"), 2000);
     return true;
 }
+
+//void MainWindow::zoomIn(bool checked) {
+//    zoomInAction->setChecked(checked);
+//    if (checked) {
+//        // connect to mouse press event to enable zoom-in on left mouse click
+//        connect(this, &MainWindow::mousePressEvent, this, &MainWindow::handleZoomIn);
+//    } else {
+//        // disconnect from mouse press event to disable zoom-in
+//        disconnect(this, &MainWindow::mousePressEvent, this, &MainWindow::handleZoomIn);
+//    }
+//}
 //
+//void MainWindow::handleZoomIn(QMouseEvent *event) {
+//    // position de la souris
+//    QPoint clickPos = event->pos();
+//
+//    painter.end();
+//    QPixmap newPixmap = pixmap.scaled(pixmap.width()*1.2, pixmap.height()*1.2);
+//    pixmap = newPixmap;
+//    update();
+//    painter.begin(&pixmap);
+//}
+// in mousepressevent Check if zoom in or zoom out is checked
+//    if (zoomInAction->isChecked()) {
+//        handleZoomIn(event);
+//    } else if (zoomOutAction->isChecked()) {
+//        handleZoomOut(event);
+//    }
+//void zoomIn(bool);
+//void zoomOut(bool);
+//void handleZoomIn(QMouseEvent *event);
+//void handleZoomOut(QMouseEvent *event);
+
+void MainWindow::zoomIn() {
+    painter.end();
+    QPixmap newPixmap = pixmap.scaled(pixmap.width()*1.2, pixmap.height()*1.2);
+    pixmap = newPixmap;
+    update();
+    painter.begin(&pixmap);
+}
+
+void MainWindow::zoomOut() {
+    painter.end();
+    QPixmap newPixmap = pixmap.scaled(pixmap.width()*0.8, pixmap.height()*0.8);
+    pixmap = newPixmap;
+    update();
+    painter.begin(&pixmap);
+}
+
+void MainWindow::rectangleSelect(bool checked) {
+    rectangleSelectAction->setChecked(checked);
+    if (checked) {
+        painter.end();
+        // Activer le mode de sélection de rectangle
+        selectionRect = QRect(); // Initialiser la sélection à un rectangle vide
+        isSelectingRect = true;
+        setCursor(Qt::CrossCursor); // Changer le curseur pour indiquer le mode de sélection
+    } else {
+        // Désactiver le mode de sélection de rectangle
+        painter.begin(&pixmap);
+        isSelectingRect = false;
+        setCursor(Qt::ArrowCursor); // Changer le curseur pour indiquer que le mode de sélection est désactivé
+
+        if (selectionRect.width() > 0 && selectionRect.height() > 0) {
+            // Si un rectangle de sélection valide a été créé, copier son contenu dans le presse-papiers
+            QClipboard *clipboard = QApplication::clipboard();
+            clipboard->setPixmap(pixmap.copy(selectionRect));
+        }
+
+        // Réinitialiser la sélection de rectangle
+        selectionRect = QRect();
+        update(); // Mettre à jour l'affichage pour effacer la sélection de rectangle
+    }
+//a faire :
+//Si checked alors :
+//- on active le mode de sélection de rectangle
+//- si on fait un clic simple alors on enlève le rectangle de selection actuel
+//
+//Si pas checked alors :
+//- Désactive le mode de sélection de rectangle
+//- mais si un rectangle de sélection est en cours alors le garder
+}
+
+
+
+
+
 void MainWindow::chooseBrushColor() {
     QColor color = QColorDialog::getColor(painter.pen().color(), this, tr("Choose a color"));
     if (color.isValid()) {
@@ -144,47 +226,55 @@ void MainWindow::chooseForm()
 }
 
 // Menu Affichage
-//void MainWindow::pixelGrid() {
-//    // Modifier l'état de l'action
-//    pixelGridAction->setChecked(!pixelGridAction->isChecked());
-//
-//    // Dessiner une grille pour les pixels
-//    painter.begin(&pixmap);
-//    painter.setPen(Qt::gray);
-//    for (int x = 0; x < pixmap.width(); x += 10) {
-//        painter.drawLine(x, 0, x, pixmap.height());
-//    }
-//    for (int y = 0; y < pixmap.height(); y += 10) {
-//        painter.drawLine(0, y, pixmap.width(), y);
-//    }
-//    painter.end();
-//
-//    // Mettre à jour l'affichage du pixmap
-//    update();
-//}
 void MainWindow::pixelGrid(bool checked) {
-    // Modifier l'état de l'action si nécessaire
-    if (pixelGridAction->isChecked() != checked) {
-        pixelGridAction->setChecked(checked);
-    }
 
-    // Dessiner la grille ou effacer la grille en fonction de l'état de l'action
-    painter.begin(&pixmap);
+    // il faudrait créer un calque pour la grille de pixels
+
+    pixelGridAction->setChecked(checked);
+
     if (checked) {
-        painter.setPen(Qt::gray);
-        for (int x = 0; x < pixmap.width(); x += 10) {
-            painter.drawLine(x, 0, x, pixmap.height());
-        }
-        for (int y = 0; y < pixmap.height(); y += 10) {
-            painter.drawLine(0, y, pixmap.width(), y);
-        }
-    } else {
-        painter.fillRect(0, 0, pixmap.width(), pixmap.height(), Qt::white);
-    }
-    painter.end();
+        painter.end();
 
-    // Mettre à jour l'affichage du pixmap
-    update();
+        // Créer une nouvelle pixmap gridPixmap par dessus la pixmap de dessin
+        gridPixmap = QPixmap(pixmap.size());
+        gridPixmap.fill(Qt::transparent);
+
+        // Initialiser le painter pour dessiner sur la gridPixmap
+        QPainter gridPainter(&gridPixmap);
+
+        // Dessiner une grille de pixels sur la gridPixmap
+        QPen pen(Qt::gray, 1, Qt::DotLine);
+        gridPainter.setPen(pen);
+
+        int gridSize = 10;  // taille des pixels de la grille
+        for (int i = gridSize; i < gridPixmap.width(); i += gridSize) {
+            gridPainter.drawLine(i, 0, i, gridPixmap.height());
+        }
+        for (int j = gridSize; j < gridPixmap.height(); j += gridSize) {
+            gridPainter.drawLine(0, j, gridPixmap.width(), j);
+        }
+
+        // Arrêter de dessiner sur la gridPixmap
+        gridPainter.end();
+
+        // Initialiser le painter pour dessiner sur la pixmap de dessin
+        painter.begin(&pixmap);
+
+        // Dessiner la pixmap de dessin sans la gridPixmap
+        painter.drawPixmap(0, 0, pixmap);
+        // Dessiner la gridPixmap sur la pixmap de dessin
+        painter.drawPixmap(0, 0, gridPixmap);
+        update();
+    } else {
+        // Supprimer la gridPixmap
+        gridPixmap = QPixmap();
+
+        // Afficher seulement la pixmap de dessin
+        painter.end();
+        painter.begin(&pixmap);
+        painter.drawPixmap(0, 0, pixmap);
+        update();
+    }
 }
 
 // Menu Image
@@ -410,6 +500,64 @@ void MainWindow::createActions() {
     connect(exitAction, &QAction::triggered, this, &MainWindow::quit);
     fileMenu->addAction(exitAction);
 
+    // Créer un menu "Tools" dans la barre de menu
+    QMenu *toolsMenu = menuBar()->addMenu(tr("&Tools"));
+    // Créer une toolbar "Tools"
+    QToolBar *toolsToolBar = addToolBar(tr("Tools"));
+    toolsToolBar->setStyleSheet("background-color: orange;");
+
+    // Action zoom in
+    const QIcon zoomInIcon = QIcon("./images/zoomIn.png");
+    zoomInAction = new QAction(zoomInIcon, tr("Zoom in"), this);
+    zoomInAction->setShortcut(tr("Ctrl++"));
+    zoomInAction->setStatusTip(tr("Zoom in"));
+    connect(zoomInAction, &QAction::triggered, this, &MainWindow::zoomIn);
+    toolsMenu->addAction(zoomInAction);
+    toolsToolBar->addAction(zoomInAction);
+
+    // Action zoom out
+    const QIcon zoomOutIcon = QIcon("./images/zoomOut.png");
+    zoomOutAction = new QAction(zoomOutIcon, tr("Zoom out"), this);
+    zoomOutAction->setShortcut(tr("Ctrl+-"));
+    zoomOutAction->setStatusTip(tr("Zoom out"));
+    connect(zoomOutAction, &QAction::triggered, this, &MainWindow::zoomOut);
+    toolsMenu->addAction(zoomOutAction);
+    toolsToolBar->addAction(zoomOutAction);
+
+
+
+
+
+
+
+
+
+
+
+    // Action rectangle de sélection
+    const QIcon rectangleSelectIcon = QIcon("./images/rectangleSelect.png");
+    rectangleSelectAction = new QAction(rectangleSelectIcon, tr("Rectangle select"), this);
+    rectangleSelectAction->setShortcut(QKeySequence::New);
+    rectangleSelectAction->setStatusTip(tr("Rectangle select"));
+    rectangleSelectAction->setCheckable(true);
+    connect(rectangleSelectAction, &QAction::toggled, this, &MainWindow::rectangleSelect);
+    toolsMenu->addAction(rectangleSelectAction);
+    toolsToolBar->addAction(rectangleSelectAction);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     // Créer un menu "Brush" dans la barre de menu
     QMenu *brushMenu = menuBar()->addMenu(tr("&Brush"));
     // Créer une toolbar "Brush"
@@ -456,7 +604,6 @@ void MainWindow::createActions() {
     pixelGridAction->setShortcut(QKeySequence::New);
     pixelGridAction->setStatusTip(tr("Pixel grid"));
     pixelGridAction->setCheckable(true);
-//    connect(pixelGridAction, &QAction::triggered, this, &MainWindow::pixelGrid);
     connect(pixelGridAction, &QAction::toggled, this, &MainWindow::pixelGrid);
     displayMenu->addAction(pixelGridAction);
     displayToolBar->addAction(pixelGridAction);
@@ -522,12 +669,11 @@ void MainWindow::createActions() {
 
 //    A FAIRE : COMME POUR RESIZE CANVAS ENREGISTRER PINCEAU ET COULEUR POUR OPEN d'images
 //    A FAIRE : brush size : se rappeller de la taille quand on veut la changer car là ca remet a 1 la selection
-//    A FAIRE : quand on change de couleur, le painceau devient des cubes
+//    ??????? : quand on change de couleur, le painceau devient des cubes ???
 //    A FAIRE : resizecanva : 1 boite de dialog
 //    A FAIRE : setStatusTip marche pas
 
     // Menu affichage :
-    // zoom avant / arrière : mettre raccourci ctrl +molette
     // une règle des pixels sur les cotés gauche et haut
     // grille de pixels
 
@@ -548,15 +694,6 @@ void MainWindow::createActions() {
     // Menu calque
 
     // Menu effet
-
-
-
-    // Menu image :
-    // redimensionner CHECK
-    // taille de zone du dessin CHECK
-    // retourner horizontalement CHECK
-    // retourner verticalement CHECK
-    // faire pivoter CHECK
 }
 
 void MainWindow::mousePressEvent(QMouseEvent *event)
@@ -564,6 +701,13 @@ void MainWindow::mousePressEvent(QMouseEvent *event)
     if (event->button() == Qt::LeftButton) {
         // Enregistre la position actuelle de la souris
         lastPoint = event->pos();
+    }
+
+    if (isSelectingRect) {
+        // Commencer la sélection de rectangle à partir du point d'origine
+        selectionRect.setTopLeft(event->pos());
+        selectionRect.setWidth(0);
+        selectionRect.setHeight(0);
     }
 }
 
@@ -579,6 +723,12 @@ void MainWindow::mouseMoveEvent(QMouseEvent *event)
         // Met à jour la fenêtre
         update();
     }
+
+    if (isSelectingRect) {
+        // Mettre à jour la taille de la sélection de rectangle en fonction de la position actuelle de la souris
+        selectionRect.setBottomRight(event->pos());
+        update(); // Mettre à jour l'affichage pour dessiner la sélection de rectangle
+    }
 }
 
 void MainWindow::paintEvent(QPaintEvent *)
@@ -586,4 +736,13 @@ void MainWindow::paintEvent(QPaintEvent *)
     // Dessine le pixmap sur la fenêtre
     QPainter painter(this);
     painter.drawPixmap(0, 0, pixmap);
+
+    if (isSelectingRect) {
+        // Dessiner la sélection de rectangle en pointillés
+        QPen pen(Qt::DashLine);
+        pen.setWidth(2);
+        pen.setColor(Qt::black);
+        painter.setPen(pen);
+        painter.drawRect(selectionRect);
+    }
 }

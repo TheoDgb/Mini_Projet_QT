@@ -16,10 +16,7 @@ class MainWindow : public QMainWindow
 Q_OBJECT
 
 public:
-    MainWindow(QWidget *parent = nullptr);
-    ~MainWindow();
-
-//    explicit MainWindow(QWidget *parent = nullptr);
+    explicit MainWindow(QWidget *parent = nullptr);
 
 protected:
     void mousePressEvent(QMouseEvent *event) override;
@@ -32,6 +29,12 @@ private slots:
     void quit();
     bool save();
     bool saveAs();
+
+    void zoomIn();
+    void zoomOut();
+
+    void rectangleSelect(bool checked);
+
     void chooseBrushColor();
     void chooseBrushSize();
     void chooseForm();
@@ -55,6 +58,13 @@ private:
     QPainter painter;
     QString currentFile;
     QAction *pixelGridAction;
+    QPixmap gridPixmap;
+    QAction *zoomInAction;
+    QAction *zoomOutAction;
+    QAction *rectangleSelectAction;
+    QRect selectionRect;
+    bool isSelectingRect;
+
 };
 
 #endif

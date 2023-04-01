@@ -257,8 +257,6 @@ void MainWindow::chooseForm(bool) {
         paintBucketAction->setChecked(false);
         pinceauAction->setChecked(false);
         droiteAction->setChecked(false);
-    } else {
-
     }
 }
 
@@ -777,6 +775,15 @@ void MainWindow::mousePressEvent(QMouseEvent *event)
         selectionRect.setTopLeft(event->pos());
         selectionRect.setWidth(0);
         selectionRect.setHeight(0);
+    }
+
+    if (paintBucketAction->isChecked()) {
+        if (event->button() == Qt::LeftButton) {
+            QRect rect = pixmap.rect();
+            QPainter painter(&pixmap);
+            painter.fillRect(rect, brushColor);
+            update();
+        }
     }
 }
 

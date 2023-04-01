@@ -232,12 +232,9 @@ void MainWindow::chooseBrushColor() {
     }
 }
 void MainWindow::chooseBrushSize() {
-    bool ok;
-    int size = QInputDialog::getInt(this, tr("Brush size"), tr("Select a brush size :"), brushSize, 1, 50, 1, &ok);
-    if (ok) {
-        brushSize = size;
-        painter.setPen(QPen(painter.pen().color(), brushSize, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
-    }
+    int size = QInputDialog::getInt(this, tr("Brush size"), tr("Select a brush size :"), brushSize, 1, 50, 1);
+    brushSize = size;
+    painter.setPen(QPen(painter.pen().color(), brushSize, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
 }
 void MainWindow::chooseForm()
 {

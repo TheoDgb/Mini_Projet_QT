@@ -192,6 +192,7 @@ void MainWindow::rectangleSelect(bool) {
         pinceauAction->setChecked(false);
         droiteAction->setChecked(false);
         formAction->setChecked(false);
+
         // Activer le mode de sélection de rectangle
         selectionRect = QRect(); // Initialiser la sélection à un rectangle vide
         isSelectingRect = true;
@@ -228,8 +229,6 @@ void MainWindow::paintBucket(bool) {
         pinceauAction->setChecked(false);
         droiteAction->setChecked(false);
         formAction->setChecked(false);
-    } else {
-
     }
 }
 void MainWindow::pinceau(bool) {
@@ -601,7 +600,7 @@ void MainWindow::createActions() {
     paintBucketAction->setShortcut(QKeySequence::New);
     paintBucketAction->setStatusTip(tr("Paint Bucket"));
     paintBucketAction->setCheckable(true);
-    connect(pinceauAction, &QAction::toggled, this, &MainWindow::paintBucket);
+    connect(paintBucketAction, &QAction::toggled, this, &MainWindow::paintBucket);
     toolsMenu->addAction(paintBucketAction);
     toolsToolBar->addAction(paintBucketAction);
 
@@ -628,11 +627,9 @@ void MainWindow::createActions() {
     formAction->setShortcut(QKeySequence::New);
     formAction->setStatusTip(tr("Choose a form"));
     formAction->setCheckable(true);
-    connect(formAction, &QAction::triggered, this, &MainWindow::chooseForm);
+    connect(formAction, &QAction::toggled, this, &MainWindow::chooseForm);
     toolsMenu->addAction(formAction);
     toolsToolBar->addAction(formAction);
-
-
 
 
 
@@ -827,7 +824,7 @@ void MainWindow::mouseReleaseEvent(QMouseEvent *event)
 void MainWindow::paintEvent(QPaintEvent *)
 {
     // pinceau par défaut
-    if (!rectangleSelectAction->isChecked() && !pinceauAction->isChecked() && !droiteAction->isChecked()) {
+    if (!rectangleSelectAction->isChecked() && !paintBucketAction->isChecked() && !pinceauAction->isChecked() && !droiteAction->isChecked() && !formAction->isChecked()) {
         pinceauAction->setChecked(true);
     }
     // Dessine le pixmap sur la fenêtre

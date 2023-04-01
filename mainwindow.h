@@ -22,6 +22,7 @@ protected:
     void mousePressEvent(QMouseEvent *event) override;
     void mouseMoveEvent(QMouseEvent *event) override;
     void paintEvent(QPaintEvent *event) override;
+    void mouseReleaseEvent(QMouseEvent *event) override;
 
 private slots:
     void newFile();
@@ -32,9 +33,9 @@ private slots:
 
     void zoomIn();
     void zoomOut();
-
     void pinceau(bool);
     void rectangleSelect(bool);
+    void droite(bool);
 
     void chooseBrushColor();
     void chooseBrushSize();
@@ -65,8 +66,13 @@ private:
     QPixmap gridPixmap;
     QAction *zoomInAction;
     QAction *zoomOutAction;
-    QAction *pinceauAction;
     QAction *rectangleSelectAction;
+    QAction *pinceauAction;
+    QAction *droiteAction;
+    QPoint startPoint;
+    QPoint endPoint;
+    QPixmap previewPixmap;
+
     QRect selectionRect;
     bool isSelectingRect;
 

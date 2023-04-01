@@ -186,18 +186,10 @@ void MainWindow::zoomOut() {
         update();
     }
 }
-void MainWindow::pinceau(bool) {
-    if (pinceauAction->isChecked()) {
-        rectangleSelectAction->setChecked(false);
-        painter.begin(&pixmap);
-        painter.setPen(QPen(brushColor, brushSize, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
-    } else {
-        painter.end();
-    }
-}
 void MainWindow::rectangleSelect(bool) {
     if (rectangleSelectAction->isChecked()) {
         pinceauAction->setChecked(false);
+        droiteAction->setChecked(false);
         // Activer le mode de sélection de rectangle
         selectionRect = QRect(); // Initialiser la sélection à un rectangle vide
         isSelectingRect = true;
@@ -228,20 +220,55 @@ void MainWindow::rectangleSelect(bool) {
 //Si pas checked alors :
 //- Désactive le mode de sélection de rectangle
 //- mais si un rectangle de sélection est en cours alors le garder
+void MainWindow::pinceau(bool) {
+    if (pinceauAction->isChecked()) {
+        rectangleSelectAction->setChecked(false);
+        droiteAction->setChecked(false);
+        painter.begin(&pixmap);
+        painter.setPen(QPen(brushColor, brushSize, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
+    } else {
+        painter.end();
+    }
+}
+void MainWindow::droite(bool)
+{
+    if (droiteAction->isChecked()) {
+        rectangleSelectAction->setChecked(false);
+        pinceauAction->setChecked(false);
+    }
+}
 
 
 
 void MainWindow::chooseBrushColor() {
-    QColor color = QColorDialog::getColor(brushColor, this, tr("Choose brush color"));
-    if (color.isValid()) {
-        brushColor = color;
-        painter.setPen(QPen(brushColor, brushSize, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
+    if (pinceauAction->isChecked()) {
+        QColor color = QColorDialog::getColor(brushColor, this, tr("Choose brush color"));
+        if (color.isValid()) {
+            brushColor = color;
+            painter.setPen(QPen(brushColor, brushSize, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
+        }
+    } else {
+        painter.begin(&pixmap);
+        QColor color = QColorDialog::getColor(brushColor, this, tr("Choose brush color"));
+        if (color.isValid()) {
+            brushColor = color;
+            painter.setPen(QPen(brushColor, brushSize, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
+        }
+        painter.end();
     }
 }
 void MainWindow::chooseBrushSize() {
-    int size = QInputDialog::getInt(this, tr("Brush size"), tr("Select a brush size :"), brushSize, 1, 50, 1);
-    brushSize = size;
-    painter.setPen(QPen(painter.pen().color(), brushSize, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
+    if (pinceauAction->isChecked()) {
+        int size = QInputDialog::getInt(this, tr("Brush size"), tr("Select a brush size :"), brushSize, 1, 50, 1);
+        brushSize = size;
+        painter.setPen(QPen(painter.pen().color(), brushSize, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
+    } else {
+        painter.begin(&pixmap);
+        int size = QInputDialog::getInt(this, tr("Brush size"), tr("Select a brush size :"), brushSize, 1, 50, 1);
+        brushSize = size;
+        painter.setPen(QPen(painter.pen().color(), brushSize, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
+        painter.end();
+    }
 }
 void MainWindow::chooseForm()
 {
@@ -567,6 +594,15 @@ void MainWindow::createActions() {
     toolsMenu->addAction(rectangleSelectAction);
     toolsToolBar->addAction(rectangleSelectAction);
 
+    // Action droite
+    const QIcon droiteIcon = QIcon("./images/droite.png");
+    droiteAction = new QAction(droiteIcon, tr("Droite"), this);
+    droiteAction->setShortcut(QKeySequence::New);
+    droiteAction->setStatusTip(tr("Droite"));
+    droiteAction->setCheckable(true);
+    connect(droiteAction, &QAction::toggled, this, &MainWindow::droite);
+    toolsMenu->addAction(droiteAction);
+    toolsToolBar->addAction(droiteAction);
 
 
 
@@ -708,11 +744,8 @@ void MainWindow::createActions() {
     // Zoom
     // baguette magique
     // pot de peinture
-    // pinceau
-    // selecteur de couleur
     // texte
     // formes
-    // droite / courbe
 
     // Menu calque
 
@@ -724,7 +757,15 @@ void MainWindow::mousePressEvent(QMouseEvent *event)
 {
     if (event->button() == Qt::LeftButton) {
         // Enregistre la position actuelle de la souris
-        lastPoint = event->pos();
+        lastPoint = startPoint = event->pos();
+    }
+    if (droiteAction->isChecked()) {
+        if (event->button() == Qt::LeftButton) {
+            // Capturez la position de départ du point a
+            startPoint = event->pos();
+            // Créez une pixmap temporaire pour dessiner la droite en temps réel
+            previewPixmap = pixmap;
+        }
     }
 
     if (isSelectingRect) {
@@ -738,13 +779,21 @@ void MainWindow::mousePressEvent(QMouseEvent *event)
 void MainWindow::mouseMoveEvent(QMouseEvent *event)
 {
     if (event->buttons() & Qt::LeftButton) {
-        // Dessine une ligne entre la dernière position de la souris et la nouvelle position
-        painter.drawLine(lastPoint, event->pos());
-
+        if (pinceauAction->isChecked()) {
+            // Dessine une ligne entre la dernière position de la souris et la nouvelle position
+            painter.drawLine(lastPoint, event->pos());
+        }
+        if (droiteAction->isChecked()) {
+            if (event->buttons() & Qt::LeftButton) {
+                // Pixmap temporaire sinon plein de droites se créent
+                QPainter painter(&previewPixmap);
+                painter.drawLine(startPoint, event->pos());
+                update();
+            }
+        }
         // Enregistre la nouvelle position de la souris comme la dernière position
         lastPoint = event->pos();
 
-        // Met à jour la fenêtre
         update();
     }
 
@@ -754,14 +803,26 @@ void MainWindow::mouseMoveEvent(QMouseEvent *event)
         update(); // Mettre à jour l'affichage pour dessiner la sélection de rectangle
     }
 }
-
+void MainWindow::mouseReleaseEvent(QMouseEvent *event)
+{
+    if (droiteAction->isChecked()) {
+        if (event->button() == Qt::LeftButton) {
+            // Droite finale
+            QPainter painter(&pixmap);
+            painter.setPen(QPen(brushColor, brushSize, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
+            painter.drawLine(startPoint, event->pos());
+            update();
+            // Réinitialiser la pixmap temporaire
+            previewPixmap = QPixmap();
+        }
+    }
+}
 void MainWindow::paintEvent(QPaintEvent *)
 {
-    if (!rectangleSelectAction->isChecked() && !pinceauAction->isChecked()) {
-        // Aucun outil n'est activé, activer le pinceau par défaut
+    // pinceau par défaut
+    if (!rectangleSelectAction->isChecked() && !pinceauAction->isChecked() && !droiteAction->isChecked()) {
         pinceauAction->setChecked(true);
     }
-
     // Dessine le pixmap sur la fenêtre
     QPainter painter(this);
     painter.drawPixmap(0, 0, pixmap);

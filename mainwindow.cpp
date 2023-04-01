@@ -220,6 +220,9 @@ void MainWindow::rectangleSelect(bool) {
 //Si pas checked alors :
 //- Désactive le mode de sélection de rectangle
 //- mais si un rectangle de sélection est en cours alors le garder
+void MainWindow::paintBucket(bool) {
+
+}
 void MainWindow::pinceau(bool) {
     if (pinceauAction->isChecked()) {
         rectangleSelectAction->setChecked(false);
@@ -237,9 +240,12 @@ void MainWindow::droite(bool)
         pinceauAction->setChecked(false);
     }
 }
+void MainWindow::chooseForm(bool)
+{
+    // choisir une forme
+}
 
-
-
+// Menu Brush
 void MainWindow::chooseBrushColor() {
     if (pinceauAction->isChecked()) {
         QColor color = QColorDialog::getColor(brushColor, this, tr("Choose brush color"));
@@ -269,10 +275,6 @@ void MainWindow::chooseBrushSize() {
         painter.setPen(QPen(painter.pen().color(), brushSize, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
         painter.end();
     }
-}
-void MainWindow::chooseForm()
-{
-    // choisir une forme
 }
 
 // Menu Affichage
@@ -391,10 +393,10 @@ void MainWindow::resizeCanvas() {
     // Ouvrir une boite de dialogue pour demander une nouvelle taille pour la zone de dessin
     bool ok;
     int newWidth = QInputDialog::getInt(this, tr("Nouvelle largeur"), tr("Entrer la nouvelle largeur :"), pixmap.width(), 100, 1000, 1, &ok);
-    if (!ok) return; // L'utilisateur a cliqué sur Annuler ou Fermer
+    if (!ok) return; // Annuler
 
     int newHeight = QInputDialog::getInt(this, tr("Nouvelle hauteur"), tr("Entrer la nouvelle hauteur :"), pixmap.height(), 100, 1000, 1, &ok);
-    if (!ok) return; // L'utilisateur a cliqué sur Annuler ou Fermer
+    if (!ok) return; // Annuler
 
     // Sauvegarder la taille et la couleur de la brosse
     int oldBrushSize = painter.pen().width();
@@ -417,7 +419,6 @@ void MainWindow::resizeCanvas() {
     // Restaurer la taille et la couleur de la brosse
     painter.setPen(QPen(oldBrushColor, oldBrushSize, Qt::SolidLine));
 
-    // Mettre à jour l'affichage de la zone de dessin
     update();
 }
 void MainWindow::flipHorizontally() {
@@ -503,9 +504,8 @@ void MainWindow::createActions() {
     QToolBar *fileToolBar = addToolBar(tr("File"));
     fileToolBar->setStyleSheet("background-color: #00D6FF;");
 
-    const QIcon newIcon = QIcon::fromTheme("document-new", QIcon(":/images/new.png"));
     // Création d'une action "Nouveau"
-    QAction *newAction = new QAction(newIcon, tr("&New"), this);
+    QAction *newAction = new QAction(QIcon::fromTheme("document-new", QIcon(":/images/new.png")), tr("&New"), this);
     newAction->setShortcut(QKeySequence::New);
     newAction->setStatusTip(tr("Create a new file"));
     connect(newAction, &QAction::triggered, this, &MainWindow::newFile);
@@ -514,8 +514,7 @@ void MainWindow::createActions() {
     fileToolBar->addAction(newAction);
 
     // Action ouvrir une image
-    const QIcon openIcon = QIcon::fromTheme("document-open", QIcon(":/images/open.png"));
-    QAction *openAction = new QAction(openIcon, tr("&Open"), this);
+    QAction *openAction = new QAction(QIcon::fromTheme("document-open", QIcon(":/images/open.png")), tr("&Open"), this);
     openAction->setShortcuts(QKeySequence::Open);
     openAction->setStatusTip(tr("Open an existing file"));
     connect(openAction, &QAction::triggered, this, &MainWindow::open);
@@ -523,8 +522,7 @@ void MainWindow::createActions() {
     fileToolBar->addAction(openAction);
 
     // Action enregistrer une image
-    const QIcon saveIcon = QIcon::fromTheme("document-save", QIcon(":/images/save.png"));
-    QAction *saveAction = new QAction(saveIcon, tr("&Save"), this);
+    QAction *saveAction = new QAction(QIcon::fromTheme("document-save", QIcon(":/images/save.png")), tr("&Save"), this);
     saveAction->setShortcuts(QKeySequence::Open);
     saveAction->setStatusTip(tr("Save file"));
     connect(saveAction, &QAction::triggered, this, &MainWindow::save);
@@ -532,8 +530,7 @@ void MainWindow::createActions() {
     fileToolBar->addAction(saveAction);
 
     // Action enregistrer sous une image
-    const QIcon saveAsIcon = QIcon::fromTheme("document-save-as");
-    QAction *saveAsAction = new QAction(saveAsIcon, tr("&Save as"), this);
+    QAction *saveAsAction = new QAction(QIcon::fromTheme("document-save-as"), tr("&Save as"), this);
     saveAsAction->setShortcuts(QKeySequence::Open);
 //    saveAsAction->setStatusTip(tr("Save file"));
     connect(saveAsAction, &QAction::triggered, this, &MainWindow::saveAs);
@@ -557,8 +554,7 @@ void MainWindow::createActions() {
     toolsToolBar->setStyleSheet("background-color: orange;");
 
     // Action zoom in
-    const QIcon zoomInIcon = QIcon("./images/zoomIn.png");
-    zoomInAction = new QAction(zoomInIcon, tr("Zoom in"), this);
+    zoomInAction = new QAction(QIcon("./images/zoomIn.png"), tr("Zoom in"), this);
     zoomInAction->setShortcut(tr("Ctrl++"));
     zoomInAction->setStatusTip(tr("Zoom in"));
     connect(zoomInAction, &QAction::triggered, this, &MainWindow::zoomIn);
@@ -566,27 +562,15 @@ void MainWindow::createActions() {
     toolsToolBar->addAction(zoomInAction);
 
     // Action zoom out
-    const QIcon zoomOutIcon = QIcon("./images/zoomOut.png");
-    zoomOutAction = new QAction(zoomOutIcon, tr("Zoom out"), this);
+    zoomOutAction = new QAction(QIcon("./images/zoomOut.png"), tr("Zoom out"), this);
     zoomOutAction->setShortcut(tr("Ctrl+-"));
     zoomOutAction->setStatusTip(tr("Zoom out"));
     connect(zoomOutAction, &QAction::triggered, this, &MainWindow::zoomOut);
     toolsMenu->addAction(zoomOutAction);
     toolsToolBar->addAction(zoomOutAction);
 
-    // Action pinceau
-    const QIcon pinceauIcon = QIcon("./images/pinceau.png");
-    pinceauAction = new QAction(pinceauIcon, tr("Pinceau"), this);
-    pinceauAction->setShortcut(QKeySequence::New);
-    pinceauAction->setStatusTip(tr("Pinceau"));
-    pinceauAction->setCheckable(true);
-    connect(pinceauAction, &QAction::toggled, this, &MainWindow::pinceau);
-    toolsMenu->addAction(pinceauAction);
-    toolsToolBar->addAction(pinceauAction);
-
     // Action rectangle de sélection
-    const QIcon rectangleSelectIcon = QIcon("./images/rectangleSelect.png");
-    rectangleSelectAction = new QAction(rectangleSelectIcon, tr("Rectangle select"), this);
+    rectangleSelectAction = new QAction(QIcon("./images/rectangleSelect.png"), tr("Rectangle select"), this);
     rectangleSelectAction->setShortcut(QKeySequence::New);
     rectangleSelectAction->setStatusTip(tr("Rectangle select"));
     rectangleSelectAction->setCheckable(true);
@@ -594,9 +578,26 @@ void MainWindow::createActions() {
     toolsMenu->addAction(rectangleSelectAction);
     toolsToolBar->addAction(rectangleSelectAction);
 
+    // Action paint bucket
+    paintBucketAction = new QAction(QIcon("./images/paintBucket.png"), tr("Paint Bucket"), this);
+    paintBucketAction->setShortcut(QKeySequence::New);
+    paintBucketAction->setStatusTip(tr("Paint Bucket"));
+    paintBucketAction->setCheckable(true);
+    connect(pinceauAction, &QAction::toggled, this, &MainWindow::paintBucket);
+    toolsMenu->addAction(paintBucketAction);
+    toolsToolBar->addAction(paintBucketAction);
+
+    // Action pinceau
+    pinceauAction = new QAction(QIcon("./images/pinceau.png"), tr("Pinceau"), this);
+    pinceauAction->setShortcut(QKeySequence::New);
+    pinceauAction->setStatusTip(tr("Pinceau"));
+    pinceauAction->setCheckable(true);
+    connect(pinceauAction, &QAction::toggled, this, &MainWindow::pinceau);
+    toolsMenu->addAction(pinceauAction);
+    toolsToolBar->addAction(pinceauAction);
+
     // Action droite
-    const QIcon droiteIcon = QIcon("./images/droite.png");
-    droiteAction = new QAction(droiteIcon, tr("Droite"), this);
+    droiteAction = new QAction(QIcon("./images/droite.png"), tr("Droite"), this);
     droiteAction->setShortcut(QKeySequence::New);
     droiteAction->setStatusTip(tr("Droite"));
     droiteAction->setCheckable(true);
@@ -604,6 +605,14 @@ void MainWindow::createActions() {
     toolsMenu->addAction(droiteAction);
     toolsToolBar->addAction(droiteAction);
 
+    // Action choisir une forme (cercle/trait/rectangle)
+    formAction = new QAction(QIcon("./images/form.png"),tr("&Choose Form"), this);
+    formAction->setShortcut(QKeySequence::New);
+    formAction->setStatusTip(tr("Choose a form"));
+    formAction->setCheckable(true);
+    connect(formAction, &QAction::triggered, this, &MainWindow::chooseForm);
+    toolsMenu->addAction(formAction);
+    toolsToolBar->addAction(formAction);
 
 
 
@@ -624,8 +633,7 @@ void MainWindow::createActions() {
     brushToolBar->setStyleSheet("background-color: #9A9A9A;");
 
     // Action choisir la couleur de la brush
-    const QIcon colorIcon = QIcon::fromTheme("color-picker", QIcon(":/images/color.png"));
-    QAction *colorAction = new QAction(colorIcon, tr("Choose Color"), this);
+    QAction *colorAction = new QAction(QIcon::fromTheme("color-picker", QIcon(":/images/color.png")), tr("Choose Color"), this);
     colorAction->setShortcut(QKeySequence::New);
     colorAction->setStatusTip(tr("Choose a color for the brush"));
     connect(colorAction, &QAction::triggered, this, &MainWindow::chooseBrushColor);
@@ -633,22 +641,12 @@ void MainWindow::createActions() {
     brushToolBar->addAction(colorAction);
 
     // Action choisir la taille de la brush
-    const QIcon sizeIcon = QIcon("./images/size.png");
-    QAction *sizeAction = new QAction(sizeIcon,tr("&Choose Size"), this);
+    QAction *sizeAction = new QAction(QIcon("./images/size.png"),tr("&Choose Size"), this);
     sizeAction->setShortcut(QKeySequence::New);
     sizeAction->setStatusTip(tr("Choose a size for the brush"));
     connect(sizeAction, &QAction::triggered, this, &MainWindow::chooseBrushSize);
     brushMenu->addAction(sizeAction);
     brushToolBar->addAction(sizeAction);
-
-    // Action choisir une forme (cercle/trait/rectangle)
-    const QIcon formIcon = QIcon("./images/form.png");
-    QAction *formAction = new QAction(formIcon,tr("&Choose Form"), this);
-    formAction->setShortcut(QKeySequence::New);
-    formAction->setStatusTip(tr("Choose a form"));
-    connect(formAction, &QAction::triggered, this, &MainWindow::chooseForm);
-    brushMenu->addAction(formAction);
-    brushToolBar->addAction(formAction);
 
     // Créer un menu "Affichage" dans la barre de menu
     QMenu *displayMenu = menuBar()->addMenu(tr("&Display"));
@@ -658,8 +656,7 @@ void MainWindow::createActions() {
     displayToolBar->setStyleSheet("background-color: yellow;");
 
     // Action afficher une grille des pixels
-    const QIcon pixelGridIcon = QIcon("./images/pixelGrid.png");
-    pixelGridAction = new QAction(pixelGridIcon, tr("Pixel grid"), this);
+    pixelGridAction = new QAction(QIcon("./images/pixelGrid.png"), tr("Pixel grid"), this);
     pixelGridAction->setShortcut(QKeySequence::New);
     pixelGridAction->setStatusTip(tr("Pixel grid"));
     pixelGridAction->setCheckable(true);
@@ -671,56 +668,49 @@ void MainWindow::createActions() {
     QMenu *imageMenu = menuBar()->addMenu(tr("&Image"));
 
     // Action redimensionner l'image
-    const QIcon resizeIcon = QIcon("./images/resize.png");
-    QAction *resizeImageAction = new QAction(resizeIcon, tr("Resize image"), this);
+    QAction *resizeImageAction = new QAction(QIcon("./images/resize.png"), tr("Resize image"), this);
     resizeImageAction->setShortcut(QKeySequence::New);
     resizeImageAction->setStatusTip(tr("Resize the image"));
     connect(resizeImageAction, &QAction::triggered, this, &MainWindow::resizeImage);
     imageMenu->addAction(resizeImageAction);
 
     // Action modifier la taille de la zone de dessin
-    const QIcon resizeCanvasIcon = QIcon("./images/resizeCanvas.png");
-    QAction *resizeCanvasAction = new QAction(resizeCanvasIcon, tr("Resize canvas"), this);
+    QAction *resizeCanvasAction = new QAction(QIcon("./images/resizeCanvas.png"), tr("Resize canvas"), this);
     resizeCanvasAction->setShortcut(QKeySequence::New);
     resizeCanvasAction->setStatusTip(tr("Resize the canvas"));
     connect(resizeCanvasAction, &QAction::triggered, this, &MainWindow::resizeCanvas);
     imageMenu->addAction(resizeCanvasAction);
 
     // Action retourner horizontalement le dessin
-    const QIcon flipHorizontallyIcon = QIcon("./images/flipHorizontally.png");
-    QAction *flipHorizontallyAction = new QAction(flipHorizontallyIcon, tr("Flip horizontally"), this);
+    QAction *flipHorizontallyAction = new QAction(QIcon("./images/flipHorizontally.png"), tr("Flip horizontally"), this);
     flipHorizontallyAction->setShortcut(QKeySequence::New);
     flipHorizontallyAction->setStatusTip(tr("Flip horizontally the image"));
     connect(flipHorizontallyAction, &QAction::triggered, this, &MainWindow::flipHorizontally);
     imageMenu->addAction(flipHorizontallyAction);
 
     // Action retourner verticalement le dessin
-    const QIcon flipVerticallyIcon = QIcon("./images/flipVertically.png");
-    QAction *flipVerticallyAction = new QAction(flipVerticallyIcon, tr("Flip vertically"), this);
+    QAction *flipVerticallyAction = new QAction(QIcon("./images/flipVertically.png"), tr("Flip vertically"), this);
     flipVerticallyAction->setShortcut(QKeySequence::New);
     flipVerticallyAction->setStatusTip(tr("Flip Vertically the image"));
     connect(flipVerticallyAction, &QAction::triggered, this, &MainWindow::flipVertically);
     imageMenu->addAction(flipVerticallyAction);
 
     // Action pivoter de 90° le dessin vers la droite
-    const QIcon rotateRightIcon = QIcon("./images/rotateRight.png");
-    QAction *rotateRightAction = new QAction(rotateRightIcon, tr("Rotate 90° to the right"), this);
+    QAction *rotateRightAction = new QAction(QIcon("./images/rotateRight.png"), tr("Rotate 90° to the right"), this);
     rotateRightAction->setShortcut(QKeySequence::New);
     rotateRightAction->setStatusTip(tr("Rotate the image 90° to the right"));
     connect(rotateRightAction, &QAction::triggered, this, &MainWindow::rotateRight);
     imageMenu->addAction(rotateRightAction);
 
     // Action pivoter de 90° le dessin vers la gauche
-    const QIcon rotateLeftIcon = QIcon("./images/rotateLeft.png");
-    QAction *rotateLeftAction = new QAction(rotateLeftIcon, tr("Rotate 90° to the left"), this);
+    QAction *rotateLeftAction = new QAction(QIcon("./images/rotateLeft.png"), tr("Rotate 90° to the left"), this);
     rotateLeftAction->setShortcut(QKeySequence::New);
     rotateLeftAction->setStatusTip(tr("Rotate the image 90° to the left"));
     connect(rotateLeftAction, &QAction::triggered, this, &MainWindow::rotateLeft);
     imageMenu->addAction(rotateLeftAction);
 
     // Action pivoter de 180° le dessin
-    const QIcon rotateBehindIcon = QIcon("./images/rotateBehind.png");
-    QAction *rotateBehindAction = new QAction(rotateBehindIcon, tr("Rotate 180°"), this);
+    QAction *rotateBehindAction = new QAction(QIcon("./images/rotateBehind.png"), tr("Rotate 180°"), this);
     rotateBehindAction->setShortcut(QKeySequence::New);
     rotateBehindAction->setStatusTip(tr("Rotate the image 180°"));
     connect(rotateBehindAction, &QAction::triggered, this, &MainWindow::rotateBehind);
@@ -741,7 +731,6 @@ void MainWindow::createActions() {
     // déplacer les pixels sélectionnés
     // selctionner au lasso
     // déplacer la sélection
-    // Zoom
     // baguette magique
     // pot de peinture
     // texte

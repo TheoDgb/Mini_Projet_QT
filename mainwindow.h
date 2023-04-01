@@ -33,13 +33,14 @@ private slots:
 
     void zoomIn();
     void zoomOut();
-    void pinceau(bool);
     void rectangleSelect(bool);
+    void paintBucket(bool);
+    void pinceau(bool);
     void droite(bool);
+    void chooseForm(bool);
 
     void chooseBrushColor();
     void chooseBrushSize();
-    void chooseForm();
     void pixelGrid(bool);
 
     void resizeImage();
@@ -67,15 +68,16 @@ private:
     QAction *zoomInAction;
     QAction *zoomOutAction;
     QAction *rectangleSelectAction;
-    QAction *pinceauAction;
-    QAction *droiteAction;
-    QPoint startPoint;
-    QPoint endPoint;
-    QPixmap previewPixmap;
-
     QRect selectionRect;
     bool isSelectingRect;
 
+    QAction *paintBucketAction;
+    QAction *pinceauAction;
+    QAction *droiteAction;
+    QAction *formAction;
+    QPoint startPoint;
+    QPoint endPoint;
+    QPixmap previewPixmap;
 };
 
 #endif

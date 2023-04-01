@@ -188,8 +188,10 @@ void MainWindow::zoomOut() {
 }
 void MainWindow::rectangleSelect(bool) {
     if (rectangleSelectAction->isChecked()) {
+        paintBucketAction->setChecked(false);
         pinceauAction->setChecked(false);
         droiteAction->setChecked(false);
+        formAction->setChecked(false);
         // Activer le mode de sélection de rectangle
         selectionRect = QRect(); // Initialiser la sélection à un rectangle vide
         isSelectingRect = true;
@@ -221,28 +223,44 @@ void MainWindow::rectangleSelect(bool) {
 //- Désactive le mode de sélection de rectangle
 //- mais si un rectangle de sélection est en cours alors le garder
 void MainWindow::paintBucket(bool) {
+    if (paintBucketAction->isChecked()) {
+        rectangleSelectAction->setChecked(false);
+        pinceauAction->setChecked(false);
+        droiteAction->setChecked(false);
+        formAction->setChecked(false);
+    } else {
 
+    }
 }
 void MainWindow::pinceau(bool) {
     if (pinceauAction->isChecked()) {
         rectangleSelectAction->setChecked(false);
+        paintBucketAction->setChecked(false);
         droiteAction->setChecked(false);
+        formAction->setChecked(false);
         painter.begin(&pixmap);
         painter.setPen(QPen(brushColor, brushSize, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
     } else {
         painter.end();
     }
 }
-void MainWindow::droite(bool)
-{
+void MainWindow::droite(bool) {
     if (droiteAction->isChecked()) {
         rectangleSelectAction->setChecked(false);
+        paintBucketAction->setChecked(false);
         pinceauAction->setChecked(false);
+        formAction->setChecked(false);
     }
 }
-void MainWindow::chooseForm(bool)
-{
-    // choisir une forme
+void MainWindow::chooseForm(bool) {
+    if (formAction->isChecked()) {
+        rectangleSelectAction->setChecked(false);
+        paintBucketAction->setChecked(false);
+        pinceauAction->setChecked(false);
+        droiteAction->setChecked(false);
+    } else {
+
+    }
 }
 
 // Menu Brush

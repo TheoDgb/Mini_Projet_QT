@@ -33,6 +33,7 @@ private slots:
     void zoomIn();
     void zoomOut();
 
+    void pinceau(bool checked);
     void rectangleSelect(bool checked);
 
     void chooseBrushColor();
@@ -53,6 +54,9 @@ private:
     bool saveFile(const QString &fileName);
     void setCurrentFile(const QString &fileName);
 
+    int brushSize;
+    QColor brushColor;
+
     QPoint lastPoint;
     QPixmap pixmap;
     QPainter painter;
@@ -61,6 +65,7 @@ private:
     QPixmap gridPixmap;
     QAction *zoomInAction;
     QAction *zoomOutAction;
+    QAction *pinceauAction;
     QAction *rectangleSelectAction;
     QRect selectionRect;
     bool isSelectingRect;

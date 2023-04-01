@@ -6,15 +6,18 @@
 #include <QMessageBox>
 #include <QColorDialog>
 
-MainWindow::MainWindow(QWidget *parent)
-        : QMainWindow(parent) {
-    // taille de la fenetre <=
+MainWindow::MainWindow(QWidget *parent):QMainWindow(parent) {
+    // taille de la fenetre
     resize(720, 720);
 
     // Initialise le pixmap et le painter
     pixmap = QPixmap(400, 400);
     pixmap.fill(Qt::white);
-    painter.begin(&pixmap);
+
+    setCursor(Qt::CrossCursor);
+    // Initialise le pinceau
+    brushSize = 1;
+    brushColor = Qt::black;
 
     // Créer un menu avec des actions
     createActions();
@@ -167,7 +170,25 @@ void MainWindow::zoomOut() {
     painter.begin(&pixmap);
 }
 
+void MainWindow::pinceau(bool checked) {
+    if (pinceauAction->isChecked()) {
+        rectangleSelectAction->setChecked(false);
+    }
+    pinceauAction->setChecked(checked);
+    if (checked) {
+        painter.end();
+        painter.begin(&pixmap);
+        painter.setPen(QPen(brushColor, brushSize, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
+    } else {
+        painter.end();
+        painter.begin(&pixmap);
+    }
+}
+
 void MainWindow::rectangleSelect(bool checked) {
+    if (rectangleSelectAction->isChecked()) {
+        pinceauAction->setChecked(false);
+    }
     rectangleSelectAction->setChecked(checked);
     if (checked) {
         painter.end();
@@ -203,23 +224,21 @@ void MainWindow::rectangleSelect(bool checked) {
 
 
 
-
-
 void MainWindow::chooseBrushColor() {
-    QColor color = QColorDialog::getColor(painter.pen().color(), this, tr("Choose a color"));
+    QColor color = QColorDialog::getColor(brushColor, this, tr("Choose brush color"));
     if (color.isValid()) {
-        painter.setPen(QPen(color, painter.pen().width(), painter.pen().style()));
+        brushColor = color;
+        painter.setPen(QPen(brushColor, brushSize, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
     }
 }
-
 void MainWindow::chooseBrushSize() {
     bool ok;
-    int size = QInputDialog::getInt(this, tr("Brush size"), tr("Select a brush size :"), 1, 1, 50, 1, &ok);
+    int size = QInputDialog::getInt(this, tr("Brush size"), tr("Select a brush size :"), brushSize, 1, 50, 1, &ok);
     if (ok) {
-        painter.setPen(QPen(painter.pen().color(), size, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
+        brushSize = size;
+        painter.setPen(QPen(painter.pen().color(), brushSize, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
     }
 }
-
 void MainWindow::chooseForm()
 {
     // choisir une forme
@@ -530,7 +549,15 @@ void MainWindow::createActions() {
 
 
 
-
+    // Action pinceau
+    const QIcon pinceauIcon = QIcon("./images/pinceau.png");
+    pinceauAction = new QAction(pinceauIcon, tr("Pinceau"), this);
+    pinceauAction->setShortcut(QKeySequence::New);
+    pinceauAction->setStatusTip(tr("Pinceau"));
+    pinceauAction->setCheckable(true);
+    connect(pinceauAction, &QAction::toggled, this, &MainWindow::pinceau);
+    toolsMenu->addAction(pinceauAction);
+    toolsToolBar->addAction(pinceauAction);
 
 
 
@@ -669,7 +696,7 @@ void MainWindow::createActions() {
 
 //    A FAIRE : COMME POUR RESIZE CANVAS ENREGISTRER PINCEAU ET COULEUR POUR OPEN d'images
 //    A FAIRE : brush size : se rappeller de la taille quand on veut la changer car là ca remet a 1 la selection
-//    ??????? : quand on change de couleur, le painceau devient des cubes ???
+//    ??????? : quand on change de couleur, le pinceau devient des cubes ???
 //    A FAIRE : resizecanva : 1 boite de dialog
 //    A FAIRE : setStatusTip marche pas
 
@@ -694,6 +721,7 @@ void MainWindow::createActions() {
     // Menu calque
 
     // Menu effet
+    pinceauAction->setChecked(true);
 }
 
 void MainWindow::mousePressEvent(QMouseEvent *event)

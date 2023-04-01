@@ -22,8 +22,8 @@ QT_BEGIN_MOC_NAMESPACE
 QT_WARNING_PUSH
 QT_WARNING_DISABLE_DEPRECATED
 struct qt_meta_stringdata_MainWindow_t {
-    QByteArrayData data[23];
-    char stringdata0[236];
+    QByteArrayData data[22];
+    char stringdata0[228];
 };
 #define QT_MOC_LITERAL(idx, ofs, len) \
     Q_STATIC_BYTE_ARRAY_DATA_HEADER_INITIALIZER_WITH_OFFSET(len, \
@@ -42,23 +42,22 @@ QT_MOC_LITERAL(6, 35, 6), // "saveAs"
 QT_MOC_LITERAL(7, 42, 6), // "zoomIn"
 QT_MOC_LITERAL(8, 49, 7), // "zoomOut"
 QT_MOC_LITERAL(9, 57, 7), // "pinceau"
-QT_MOC_LITERAL(10, 65, 7), // "checked"
-QT_MOC_LITERAL(11, 73, 15), // "rectangleSelect"
-QT_MOC_LITERAL(12, 89, 16), // "chooseBrushColor"
-QT_MOC_LITERAL(13, 106, 15), // "chooseBrushSize"
-QT_MOC_LITERAL(14, 122, 10), // "chooseForm"
-QT_MOC_LITERAL(15, 133, 9), // "pixelGrid"
-QT_MOC_LITERAL(16, 143, 11), // "resizeImage"
-QT_MOC_LITERAL(17, 155, 12), // "resizeCanvas"
-QT_MOC_LITERAL(18, 168, 16), // "flipHorizontally"
-QT_MOC_LITERAL(19, 185, 14), // "flipVertically"
-QT_MOC_LITERAL(20, 200, 11), // "rotateRight"
-QT_MOC_LITERAL(21, 212, 10), // "rotateLeft"
-QT_MOC_LITERAL(22, 223, 12) // "rotateBehind"
+QT_MOC_LITERAL(10, 65, 15), // "rectangleSelect"
+QT_MOC_LITERAL(11, 81, 16), // "chooseBrushColor"
+QT_MOC_LITERAL(12, 98, 15), // "chooseBrushSize"
+QT_MOC_LITERAL(13, 114, 10), // "chooseForm"
+QT_MOC_LITERAL(14, 125, 9), // "pixelGrid"
+QT_MOC_LITERAL(15, 135, 11), // "resizeImage"
+QT_MOC_LITERAL(16, 147, 12), // "resizeCanvas"
+QT_MOC_LITERAL(17, 160, 16), // "flipHorizontally"
+QT_MOC_LITERAL(18, 177, 14), // "flipVertically"
+QT_MOC_LITERAL(19, 192, 11), // "rotateRight"
+QT_MOC_LITERAL(20, 204, 10), // "rotateLeft"
+QT_MOC_LITERAL(21, 215, 12) // "rotateBehind"
 
     },
     "MainWindow\0newFile\0\0open\0quit\0save\0"
-    "saveAs\0zoomIn\0zoomOut\0pinceau\0checked\0"
+    "saveAs\0zoomIn\0zoomOut\0pinceau\0"
     "rectangleSelect\0chooseBrushColor\0"
     "chooseBrushSize\0chooseForm\0pixelGrid\0"
     "resizeImage\0resizeCanvas\0flipHorizontally\0"
@@ -89,18 +88,18 @@ static const uint qt_meta_data_MainWindow[] = {
        7,    0,  119,    2, 0x08 /* Private */,
        8,    0,  120,    2, 0x08 /* Private */,
        9,    1,  121,    2, 0x08 /* Private */,
-      11,    1,  124,    2, 0x08 /* Private */,
-      12,    0,  127,    2, 0x08 /* Private */,
-      13,    0,  128,    2, 0x08 /* Private */,
-      14,    0,  129,    2, 0x08 /* Private */,
-      15,    1,  130,    2, 0x08 /* Private */,
-      16,    0,  133,    2, 0x08 /* Private */,
-      17,    0,  134,    2, 0x08 /* Private */,
-      18,    0,  135,    2, 0x08 /* Private */,
-      19,    0,  136,    2, 0x08 /* Private */,
-      20,    0,  137,    2, 0x08 /* Private */,
-      21,    0,  138,    2, 0x08 /* Private */,
-      22,    0,  139,    2, 0x08 /* Private */,
+      10,    1,  124,    2, 0x08 /* Private */,
+      11,    0,  127,    2, 0x08 /* Private */,
+      12,    0,  128,    2, 0x08 /* Private */,
+      13,    0,  129,    2, 0x08 /* Private */,
+      14,    1,  130,    2, 0x08 /* Private */,
+      15,    0,  133,    2, 0x08 /* Private */,
+      16,    0,  134,    2, 0x08 /* Private */,
+      17,    0,  135,    2, 0x08 /* Private */,
+      18,    0,  136,    2, 0x08 /* Private */,
+      19,    0,  137,    2, 0x08 /* Private */,
+      20,    0,  138,    2, 0x08 /* Private */,
+      21,    0,  139,    2, 0x08 /* Private */,
 
  // slots: parameters
     QMetaType::Void,
@@ -110,8 +109,8 @@ static const uint qt_meta_data_MainWindow[] = {
     QMetaType::Bool,
     QMetaType::Void,
     QMetaType::Void,
-    QMetaType::Void, QMetaType::Bool,   10,
-    QMetaType::Void, QMetaType::Bool,   10,
+    QMetaType::Void, QMetaType::Bool,    2,
+    QMetaType::Void, QMetaType::Bool,    2,
     QMetaType::Void,
     QMetaType::Void,
     QMetaType::Void,

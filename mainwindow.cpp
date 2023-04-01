@@ -155,43 +155,49 @@ bool MainWindow::saveFile(const QString &fileName)
 //void handleZoomOut(QMouseEvent *event);
 
 void MainWindow::zoomIn() {
-    painter.end();
-    QPixmap newPixmap = pixmap.scaled(pixmap.width()*1.2, pixmap.height()*1.2);
-    pixmap = newPixmap;
-    update();
-    painter.begin(&pixmap);
-}
+    if (pinceauAction->isChecked()) {
+        painter.end();
 
+        QPixmap newPixmap = pixmap.scaled(pixmap.width()*1.2, pixmap.height()*1.2);
+        pixmap = newPixmap;
+        update();
+
+        painter.begin(&pixmap);
+        painter.setPen(QPen(brushColor, brushSize, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
+    } else {
+        QPixmap newPixmap = pixmap.scaled(pixmap.width()*1.2, pixmap.height()*1.2);
+        pixmap = newPixmap;
+        update();
+    }
+}
 void MainWindow::zoomOut() {
-    painter.end();
-    QPixmap newPixmap = pixmap.scaled(pixmap.width()*0.8, pixmap.height()*0.8);
-    pixmap = newPixmap;
-    update();
-    painter.begin(&pixmap);
-}
+    if (pinceauAction->isChecked()) {
+        painter.end();
 
-void MainWindow::pinceau(bool checked) {
+        QPixmap newPixmap = pixmap.scaled(pixmap.width() * 0.8, pixmap.height() * 0.8);
+        pixmap = newPixmap;
+        update();
+
+        painter.begin(&pixmap);
+        painter.setPen(QPen(brushColor, brushSize, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
+    } else {
+        QPixmap newPixmap = pixmap.scaled(pixmap.width()*0.8, pixmap.height()*0.8);
+        pixmap = newPixmap;
+        update();
+    }
+}
+void MainWindow::pinceau(bool) {
     if (pinceauAction->isChecked()) {
         rectangleSelectAction->setChecked(false);
-    }
-    pinceauAction->setChecked(checked);
-    if (checked) {
-        painter.end();
         painter.begin(&pixmap);
         painter.setPen(QPen(brushColor, brushSize, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
     } else {
         painter.end();
-        painter.begin(&pixmap);
     }
 }
-
-void MainWindow::rectangleSelect(bool checked) {
+void MainWindow::rectangleSelect(bool) {
     if (rectangleSelectAction->isChecked()) {
         pinceauAction->setChecked(false);
-    }
-    rectangleSelectAction->setChecked(checked);
-    if (checked) {
-        painter.end();
         // Activer le mode de sélection de rectangle
         selectionRect = QRect(); // Initialiser la sélection à un rectangle vide
         isSelectingRect = true;
@@ -211,7 +217,9 @@ void MainWindow::rectangleSelect(bool checked) {
         // Réinitialiser la sélection de rectangle
         selectionRect = QRect();
         update(); // Mettre à jour l'affichage pour effacer la sélection de rectangle
+        painter.end();
     }
+}
 //a faire :
 //Si checked alors :
 //- on active le mode de sélection de rectangle
@@ -220,7 +228,6 @@ void MainWindow::rectangleSelect(bool checked) {
 //Si pas checked alors :
 //- Désactive le mode de sélection de rectangle
 //- mais si un rectangle de sélection est en cours alors le garder
-}
 
 
 
@@ -540,12 +547,6 @@ void MainWindow::createActions() {
     toolsMenu->addAction(zoomOutAction);
     toolsToolBar->addAction(zoomOutAction);
 
-
-
-
-
-
-
     // Action pinceau
     const QIcon pinceauIcon = QIcon("./images/pinceau.png");
     pinceauAction = new QAction(pinceauIcon, tr("Pinceau"), this);
@@ -555,8 +556,6 @@ void MainWindow::createActions() {
     connect(pinceauAction, &QAction::toggled, this, &MainWindow::pinceau);
     toolsMenu->addAction(pinceauAction);
     toolsToolBar->addAction(pinceauAction);
-
-
 
     // Action rectangle de sélection
     const QIcon rectangleSelectIcon = QIcon("./images/rectangleSelect.png");
@@ -758,6 +757,11 @@ void MainWindow::mouseMoveEvent(QMouseEvent *event)
 
 void MainWindow::paintEvent(QPaintEvent *)
 {
+    if (!rectangleSelectAction->isChecked() && !pinceauAction->isChecked()) {
+        // Aucun outil n'est activé, activer le pinceau par défaut
+        pinceauAction->setChecked(true);
+    }
+
     // Dessine le pixmap sur la fenêtre
     QPainter painter(this);
     painter.drawPixmap(0, 0, pixmap);

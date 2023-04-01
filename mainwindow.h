@@ -33,8 +33,8 @@ private slots:
     void zoomIn();
     void zoomOut();
 
-    void pinceau(bool checked);
-    void rectangleSelect(bool checked);
+    void pinceau(bool);
+    void rectangleSelect(bool);
 
     void chooseBrushColor();
     void chooseBrushSize();

@@ -66,17 +66,15 @@ void MainWindow::quit() {
     QApplication::quit();
 }
 
-bool MainWindow::save()
-{
+bool MainWindow::save() {
     if (currentFile.isEmpty()) {
         return saveAs();
     } else {
         return saveFile(currentFile);
     }
 }
-bool MainWindow::saveAs()
-{
-    QFileDialog dialog(this);
+bool MainWindow::saveAs() {
+    QFileDialog dialog(this, tr("Save As"));
     dialog.setWindowModality(Qt::WindowModal);
     dialog.setAcceptMode(QFileDialog::AcceptSave);
     if (dialog.exec() != QDialog::Accepted)
@@ -84,8 +82,7 @@ bool MainWindow::saveAs()
     return saveFile(dialog.selectedFiles().first());
 }
 
-void MainWindow::setCurrentFile(const QString &fileName)
-{
+void MainWindow::setCurrentFile(const QString &fileName) {
     currentFile = fileName;
     setWindowModified(false);
 
@@ -95,10 +92,8 @@ void MainWindow::setCurrentFile(const QString &fileName)
     setWindowFilePath(shownName);
 }
 
-bool MainWindow::saveFile(const QString &fileName)
-{
+bool MainWindow::saveFile(const QString &fileName) {
     QString errorMessage;
-
     QGuiApplication::setOverrideCursor(Qt::WaitCursor);
     QSaveFile file(fileName);
     if (file.open(QFile::WriteOnly)) {
@@ -154,6 +149,7 @@ bool MainWindow::saveFile(const QString &fileName)
 //void handleZoomIn(QMouseEvent *event);
 //void handleZoomOut(QMouseEvent *event);
 
+// Menu tools
 void MainWindow::zoomIn() {
     if (pinceauAction->isChecked()) {
         painter.end();
@@ -257,6 +253,20 @@ void MainWindow::chooseForm(bool) {
         paintBucketAction->setChecked(false);
         pinceauAction->setChecked(false);
         droiteAction->setChecked(false);
+
+        QStringList items;
+        items << tr("Rectangle") << tr("Circle") << tr("Triangle");
+        QString item = QInputDialog::getItem(this, tr("Choose a form"), tr("Form:"), items);
+        if (item == "Rectangle") {
+            formType = Form::RECTANGLE;
+        } else if (item == "Cercle") {
+            formType = Form::CIRCLE;
+        } else if (item == "Triangle"){
+            formType = Form::TRIANGLE;
+        } else {
+            // Pourquoi ca marche pas ???
+            formAction->setChecked(false);
+        }
     }
 }
 
@@ -757,32 +767,31 @@ void MainWindow::createActions() {
 
 void MainWindow::mousePressEvent(QMouseEvent *event)
 {
-    if (event->button() == Qt::LeftButton) {
-        // Enregistre la position actuelle de la souris
-        lastPoint = startPoint = event->pos();
-    }
-    if (droiteAction->isChecked()) {
-        if (event->button() == Qt::LeftButton) {
-            // Capturez la position de départ du point a
-            startPoint = event->pos();
-            // Créez une pixmap temporaire pour dessiner la droite en temps réel
-            previewPixmap = pixmap;
-        }
-    }
-
     if (isSelectingRect) {
         // Commencer la sélection de rectangle à partir du point d'origine
         selectionRect.setTopLeft(event->pos());
         selectionRect.setWidth(0);
         selectionRect.setHeight(0);
     }
+    if (event->button() == Qt::LeftButton) {
+        // Enregistre la position actuelle de la souris
+        lastPoint = startPoint = event->pos();
 
-    if (paintBucketAction->isChecked()) {
-        if (event->button() == Qt::LeftButton) {
+        if (paintBucketAction->isChecked()) {
             QRect rect = pixmap.rect();
             QPainter painter(&pixmap);
             painter.fillRect(rect, brushColor);
             update();
+        }
+        if (droiteAction->isChecked()) {
+            // Capturez la position de départ du point a
+            startPoint = event->pos();
+            // Créez une pixmap temporaire pour dessiner la droite en temps réel
+            previewPixmap = pixmap;
+        }
+        if (formAction->isChecked()) {
+            startPoint = event->pos();
+            previewPixmap = pixmap;
         }
     }
 }
@@ -802,9 +811,32 @@ void MainWindow::mouseMoveEvent(QMouseEvent *event)
                 update();
             }
         }
-        // Enregistre la nouvelle position de la souris comme la dernière position
-        lastPoint = event->pos();
+        if (formAction->isChecked())
+        {
+            // Pixmap temporaire sinon plein de formes se créent
+            QPainter painter(&previewPixmap);
+            painter.setPen(QPen(Qt::NoPen));
+            painter.setBrush(QBrush(brushColor));
+            switch (formType) {
+                case Form::RECTANGLE:
+                    painter.drawRect(QRect(startPoint, event->pos()));
+                    break;
+                case Form::CIRCLE:
+                    painter.drawEllipse(QRect(startPoint, event->pos()));
+                    break;
+                case Form::TRIANGLE:
+                    QPolygonF polygon;
+                    QPointF p1(startPoint.x() + (event->pos().x() - startPoint.x()) / 2, startPoint.y());
+                    QPointF p2(event->pos().x(), event->pos().y());
+                    QPointF p3(startPoint.x(), event->pos().y());
+                    polygon << p1 << p2 << p3;
+                    painter.drawPolygon(polygon);
+                    break;
+            }
+            update();
+        }
 
+        lastPoint = event->pos();
         update();
     }
 
@@ -822,6 +854,33 @@ void MainWindow::mouseReleaseEvent(QMouseEvent *event)
             QPainter painter(&pixmap);
             painter.setPen(QPen(brushColor, brushSize, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
             painter.drawLine(startPoint, event->pos());
+            update();
+            // Réinitialiser la pixmap temporaire
+            previewPixmap = QPixmap();
+        }
+    }
+    if (formAction->isChecked()) {
+        if (event->button() == Qt::LeftButton) {
+            // Forme finale
+            QPainter painter(&pixmap);
+            painter.setPen(QPen(brushColor, brushSize, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
+            painter.setBrush(QBrush(brushColor));
+            switch (formType) {
+                case Form::RECTANGLE:
+                    painter.drawRect(QRect(startPoint, event->pos()));
+                    break;
+                case Form::CIRCLE:
+                    painter.drawEllipse(QRect(startPoint, event->pos()));
+                    break;
+                case Form::TRIANGLE:
+                    QPolygonF polygon;
+                    QPointF p1(startPoint.x() + (event->pos().x() - startPoint.x()) / 2, startPoint.y());
+                    QPointF p2(event->pos().x(), event->pos().y());
+                    QPointF p3(startPoint.x(), event->pos().y());
+                    polygon << p1 << p2 << p3;
+                    painter.drawPolygon(polygon);
+                    break;
+            }
             update();
             // Réinitialiser la pixmap temporaire
             previewPixmap = QPixmap();

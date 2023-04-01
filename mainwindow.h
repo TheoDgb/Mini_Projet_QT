@@ -5,11 +5,18 @@
 #include <QMouseEvent>
 #include <QPainter>
 #include <QColorDialog>
+#include <QObject>
 
 QT_BEGIN_NAMESPACE
 class QAction;
 class QMenu;
 QT_END_NAMESPACE
+
+enum Form {
+    RECTANGLE,
+    CIRCLE,
+    TRIANGLE
+};
 
 class MainWindow : public QMainWindow
 {
@@ -78,6 +85,8 @@ private:
     QPoint startPoint;
     QPoint endPoint;
     QPixmap previewPixmap;
+
+    Form formType = RECTANGLE;
 };
 
 #endif

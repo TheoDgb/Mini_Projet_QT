@@ -23,6 +23,8 @@ MainWindow::MainWindow(QWidget *parent):QMainWindow(parent) {
     createActions();
     // Afficher le menu
     setMenuBar(menuBar());
+
+    statusBar()->show();
 }
 
 void MainWindow::newFile() {
@@ -51,9 +53,10 @@ void MainWindow::open() {
     if (!fileName.isEmpty()) {
         QPixmap image;
         if (image.load(fileName)) {
-            painter.end(); // End the painting on the old pixmap
+            painter.end();
             pixmap = image;
-            painter.begin(&pixmap); // Begin painting on the new pixmap
+            painter.begin(&pixmap);
+            painter.setPen(QPen(brushColor, brushSize, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
             update();
             setCurrentFile(fileName);
         } else {
@@ -144,10 +147,6 @@ bool MainWindow::saveFile(const QString &fileName) {
 //    } else if (zoomOutAction->isChecked()) {
 //        handleZoomOut(event);
 //    }
-//void zoomIn(bool);
-//void zoomOut(bool);
-//void handleZoomIn(QMouseEvent *event);
-//void handleZoomOut(QMouseEvent *event);
 
 // Menu tools
 void MainWindow::zoomIn() {
@@ -211,14 +210,11 @@ void MainWindow::rectangleSelect(bool) {
         painter.end();
     }
 }
-//a faire :
 //Si checked alors :
 //- on active le mode de sélection de rectangle
 //- si on fait un clic simple alors on enlève le rectangle de selection actuel
-//
 //Si pas checked alors :
-//- Désactive le mode de sélection de rectangle
-//- mais si un rectangle de sélection est en cours alors le garder
+//- On garde le mode de sélection de rectangle si un rectangle de sélection est en cours
 void MainWindow::paintBucket(bool) {
     if (paintBucketAction->isChecked()) {
         rectangleSelectAction->setChecked(false);
@@ -255,12 +251,12 @@ void MainWindow::chooseForm(bool) {
         droiteAction->setChecked(false);
 
         QStringList items;
-        items << tr("Rectangle") << tr("Circle") << tr("Triangle");
+        items << tr("Rectangle") << tr("Ellipse") << tr("Triangle");
         QString item = QInputDialog::getItem(this, tr("Choose a form"), tr("Form:"), items);
         if (item == "Rectangle") {
             formType = Form::RECTANGLE;
-        } else if (item == "Cercle") {
-            formType = Form::CIRCLE;
+        } else if (item == "Ellipse") {
+            formType = Form::ELLIPSE;
         } else if (item == "Triangle"){
             formType = Form::TRIANGLE;
         } else {
@@ -557,10 +553,10 @@ void MainWindow::createActions() {
     // Action enregistrer sous une image
     QAction *saveAsAction = new QAction(QIcon::fromTheme("document-save-as"), tr("&Save as"), this);
     saveAsAction->setShortcuts(QKeySequence::Open);
-//    saveAsAction->setStatusTip(tr("Save file"));
+    saveAsAction->setStatusTip(tr("Save file"));
     connect(saveAsAction, &QAction::triggered, this, &MainWindow::saveAs);
     fileMenu->addAction(saveAsAction);
-//    fileToolBar->addAction(saveAsAction);
+    // fileToolBar->addAction(saveAsAction);
 
     // Ajout d'une séparation entre les actions "Ouvrir" et "Quitter"
     fileMenu->addSeparator();
@@ -571,6 +567,8 @@ void MainWindow::createActions() {
     exitAction->setStatusTip(tr("Exit the application"));
     connect(exitAction, &QAction::triggered, this, &MainWindow::quit);
     fileMenu->addAction(exitAction);
+
+
 
     // Créer un menu "Tools" dans la barre de menu
     QMenu *toolsMenu = menuBar()->addMenu(tr("&Tools"));
@@ -630,7 +628,7 @@ void MainWindow::createActions() {
     toolsMenu->addAction(droiteAction);
     toolsToolBar->addAction(droiteAction);
 
-    // Action choisir une forme (cercle/trait/rectangle)
+    // Action choisir une forme (rectangle/cercle/ellipse)
     formAction = new QAction(QIcon("./images/form.png"),tr("&Choose Form"), this);
     formAction->setShortcut(QKeySequence::New);
     formAction->setStatusTip(tr("Choose a form"));
@@ -638,14 +636,6 @@ void MainWindow::createActions() {
     connect(formAction, &QAction::toggled, this, &MainWindow::chooseForm);
     toolsMenu->addAction(formAction);
     toolsToolBar->addAction(formAction);
-
-
-
-
-
-
-
-
 
 
 
@@ -671,6 +661,8 @@ void MainWindow::createActions() {
     brushMenu->addAction(sizeAction);
     brushToolBar->addAction(sizeAction);
 
+
+
     // Créer un menu "Affichage" dans la barre de menu
     QMenu *displayMenu = menuBar()->addMenu(tr("&Display"));
 
@@ -686,6 +678,8 @@ void MainWindow::createActions() {
     connect(pixelGridAction, &QAction::toggled, this, &MainWindow::pixelGrid);
     displayMenu->addAction(pixelGridAction);
     displayToolBar->addAction(pixelGridAction);
+
+
 
     // Créer un menu "Image" dans la barre de menu
     QMenu *imageMenu = menuBar()->addMenu(tr("&Image"));
@@ -739,29 +733,9 @@ void MainWindow::createActions() {
     connect(rotateBehindAction, &QAction::triggered, this, &MainWindow::rotateBehind);
     imageMenu->addAction(rotateBehindAction);
 
-//    A FAIRE : COMME POUR RESIZE CANVAS ENREGISTRER PINCEAU ET COULEUR POUR OPEN d'images
-//    A FAIRE : brush size : se rappeller de la taille quand on veut la changer car là ca remet a 1 la selection
-//    ??????? : quand on change de couleur, le pinceau devient des cubes ???
-//    A FAIRE : resizecanva : 1 boite de dialog
-//    A FAIRE : setStatusTip marche pas
 
-    // Menu affichage :
-    // une règle des pixels sur les cotés gauche et haut
-    // grille de pixels
 
-    // Menu Outils :
-    // rectangle de selection
-    // déplacer les pixels sélectionnés
-    // selctionner au lasso
-    // déplacer la sélection
-    // baguette magique
-    // pot de peinture
-    // texte
-    // formes
-
-    // Menu calque
-
-    // Menu effet
+    // Pinceau par défaut
     pinceauAction->setChecked(true);
 }
 
@@ -821,7 +795,7 @@ void MainWindow::mouseMoveEvent(QMouseEvent *event)
                 case Form::RECTANGLE:
                     painter.drawRect(QRect(startPoint, event->pos()));
                     break;
-                case Form::CIRCLE:
+                case Form::ELLIPSE:
                     painter.drawEllipse(QRect(startPoint, event->pos()));
                     break;
                 case Form::TRIANGLE:
@@ -869,7 +843,7 @@ void MainWindow::mouseReleaseEvent(QMouseEvent *event)
                 case Form::RECTANGLE:
                     painter.drawRect(QRect(startPoint, event->pos()));
                     break;
-                case Form::CIRCLE:
+                case Form::ELLIPSE:
                     painter.drawEllipse(QRect(startPoint, event->pos()));
                     break;
                 case Form::TRIANGLE:
@@ -906,3 +880,16 @@ void MainWindow::paintEvent(QPaintEvent *)
         painter.drawRect(selectionRect);
     }
 }
+
+// A FAIRE
+// Menu Outils :
+// rectangle de selection
+// déplacer les pixels sélectionnés
+// sélectionner au lasso
+// déplacer la sélection
+// baguette magique
+// texte
+
+// Menu calque
+
+// Menu effet

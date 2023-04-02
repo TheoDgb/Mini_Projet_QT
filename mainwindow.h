@@ -14,7 +14,7 @@ QT_END_NAMESPACE
 
 enum Form {
     RECTANGLE,
-    CIRCLE,
+    ELLIPSE,
     TRIANGLE
 };
 
